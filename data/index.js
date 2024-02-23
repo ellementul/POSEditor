@@ -25,7 +25,7 @@ return /******/ (() => { // webpackBootstrap
   \******************/
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
-eval("const {\n  UnitedEventsEnv,\n  Room\n} = __webpack_require__(/*! @ellementul/united-events-environment */ \"./node_modules/@ellementul/united-events-environment/index.js\");\nconst {\n  Logging\n} = __webpack_require__(/*! ./logging */ \"./logging.js\");\nconst room = new Room();\nconst env = new UnitedEventsEnv(room);\nenv.baseUrl = \"./\";\nenv.setupLogging({\n  logging: Logging()\n});\nenv.build();\n\n//# sourceURL=webpack://App/./index.js?");
+eval("const {\n  UnitedEventsEnv,\n  Room\n} = __webpack_require__(/*! @ellementul/united-events-environment */ \"./node_modules/@ellementul/united-events-environment/index.js\");\nconst {\n  Logging\n} = __webpack_require__(/*! ./logging */ \"./logging.js\");\nconst {\n  Ticker\n} = __webpack_require__(/*! @ellementul/uee-timeticker */ \"./node_modules/@ellementul/uee-timeticker/index.js\");\nconst {\n  POS\n} = __webpack_require__(/*! ./members/POS */ \"./members/POS/index.js\");\nconst room = new Room();\nroom.addMember(Ticker);\nroom.addMember(POS);\nconst env = new UnitedEventsEnv(room);\nenv.baseUrl = \"./\";\nenv.setupLogging({\n  logging: Logging()\n});\nenv.build();\nenv.run();\n\n//# sourceURL=webpack://App/./index.js?");
 
 /***/ }),
 
@@ -37,6 +37,28 @@ eval("const {\n  UnitedEventsEnv,\n  Room\n} = __webpack_require__(/*! @ellement
 
 "use strict";
 eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   Logging: () => (/* binding */ Logging)\n/* harmony export */ });\nfunction Logging() {\n  return function (payload) {\n    switch (payload.message.system) {\n      default:\n        console.log(payload.message);\n    }\n  };\n}\n\n\n//# sourceURL=webpack://App/./logging.js?");
+
+/***/ }),
+
+/***/ "./members/POS/events/show.js":
+/*!************************************!*\
+  !*** ./members/POS/events/show.js ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ellementul/united-events-environment */ \"./node_modules/@ellementul/united-events-environment/index.js\");\n\nconst type = _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__.Types.Object.Def({\n  system: \"POS\",\n  entity: \"State of POS\"\n}, true);\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,_ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__.EventFactory)(type));\n\n//# sourceURL=webpack://App/./members/POS/events/show.js?");
+
+/***/ }),
+
+/***/ "./members/POS/index.js":
+/*!******************************!*\
+  !*** ./members/POS/index.js ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   POS: () => (/* binding */ POS),\n/* harmony export */   events: () => (/* binding */ exportEvents)\n/* harmony export */ });\n/* harmony import */ var _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ellementul/united-events-environment */ \"./node_modules/@ellementul/united-events-environment/index.js\");\n/* harmony import */ var _events_show__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./events/show */ \"./members/POS/events/show.js\");\n\nconst {\n  openEvent\n} = _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__.events;\n\nclass POS extends _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__.Member {\n  constructor() {\n    super();\n    this.onEvent(openEvent, () => this.show());\n    this.role = \"POS\";\n  }\n  show() {\n    this.send(_events_show__WEBPACK_IMPORTED_MODULE_1__[\"default\"], {\n      state: {}\n    });\n  }\n}\nconst exportEvents = {\n  show: _events_show__WEBPACK_IMPORTED_MODULE_1__[\"default\"]\n};\n\n\n//# sourceURL=webpack://App/./members/POS/index.js?");
 
 /***/ }),
 
