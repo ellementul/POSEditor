@@ -40,28 +40,6 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 
 /***/ }),
 
-/***/ "./members/POS/events/show.js":
-/*!************************************!*\
-  !*** ./members/POS/events/show.js ***!
-  \************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ellementul/united-events-environment */ \"./node_modules/@ellementul/united-events-environment/index.js\");\n\nconst type = _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__.Types.Object.Def({\n  system: \"POS\",\n  entity: \"State of POS\"\n}, true);\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,_ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__.EventFactory)(type));\n\n//# sourceURL=webpack://App/./members/POS/events/show.js?");
-
-/***/ }),
-
-/***/ "./members/POS/index.js":
-/*!******************************!*\
-  !*** ./members/POS/index.js ***!
-  \******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   POS: () => (/* binding */ POS),\n/* harmony export */   events: () => (/* binding */ exportEvents)\n/* harmony export */ });\n/* harmony import */ var _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ellementul/united-events-environment */ \"./node_modules/@ellementul/united-events-environment/index.js\");\n/* harmony import */ var _events_show__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./events/show */ \"./members/POS/events/show.js\");\n\nconst {\n  openEvent\n} = _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__.events;\n\nclass POS extends _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__.Member {\n  constructor() {\n    super();\n    this.onEvent(openEvent, () => this.show());\n    this.role = \"POS\";\n  }\n  show() {\n    this.send(_events_show__WEBPACK_IMPORTED_MODULE_1__[\"default\"], {\n      state: {}\n    });\n  }\n}\nconst exportEvents = {\n  show: _events_show__WEBPACK_IMPORTED_MODULE_1__[\"default\"]\n};\n\n\n//# sourceURL=webpack://App/./members/POS/index.js?");
-
-/***/ }),
-
 /***/ "./node_modules/uuid/dist/esm-browser/native.js":
 /*!******************************************************!*\
   !*** ./node_modules/uuid/dist/esm-browser/native.js ***!
@@ -532,6 +510,28 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 
 "use strict";
 eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   hashToUuid: () => (/* binding */ hashToUuid),\n/* harmony export */   sha1Hash: () => (/* binding */ sha1Hash)\n/* harmony export */ });\n/* harmony import */ var jssha__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! jssha */ \"./node_modules/jssha/dist/sha.mjs\");\n\r\n\r\n/** List of hex digit for fast accessing by index */\r\nvar HEX_DIGITS = '0123456789abcdef'.split('');\r\n\r\nvar uint8ToHex = function (ubyte) {\r\n  var first = ubyte >> 4;\r\n  var second = ubyte - (first << 4);\r\n\r\n  return HEX_DIGITS[first] + HEX_DIGITS[second];\r\n};\r\n\r\nvar uint8ArrayToHex = function (buf) {\r\n  var out = '';\r\n\r\n  for (var i = 0; i < buf.length; i++) {\r\n    out += uint8ToHex(buf[i]);\r\n  }\r\n\r\n  return out;\r\n}\r\n\r\nvar sha1Hash = function (text) {\r\n  const shaObj = new jssha__WEBPACK_IMPORTED_MODULE_0__[\"default\"](\"SHA-1\", \"TEXT\", { encoding: \"UTF8\" })\r\n  shaObj.update(text)\r\n  return shaObj.getHash(\"UINT8ARRAY\")\r\n}\r\n\r\nvar hashToUuid = function (hashBuffer) {\r\n  return (\r\n    // The low field of the timestamp\r\n    uint8ArrayToHex(hashBuffer.slice(0, 4)) +\r\n    '-' +\r\n    // The middle field of the timestamp\r\n    uint8ArrayToHex(hashBuffer.slice(4, 6)) +\r\n    '-' +\r\n    // The high field of the timestamp multiplexed with the version number\r\n    uint8ToHex((hashBuffer[6] & 0x0f) | parseInt(5 * 10, 16)) +\r\n    uint8ToHex(hashBuffer[7]) +\r\n    '-' +\r\n    // The high field of the clock sequence multiplexed with the variant\r\n    uint8ToHex((hashBuffer[8] & 0x3f) | 0x80) +\r\n    // The low field of the clock sequence\r\n    uint8ToHex(hashBuffer[9]) +\r\n    '-' +\r\n    //  The spatially unique node identifier\r\n    uint8ArrayToHex(hashBuffer.slice(10, 16))\r\n  );\r\n};\r\n\r\n\r\n\n\n//# sourceURL=webpack://App/./node_modules/@ellementul/uuid-by-string/src/lib.js?");
+
+/***/ }),
+
+/***/ "./members/POS/events/show.js":
+/*!************************************!*\
+  !*** ./members/POS/events/show.js ***!
+  \************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ellementul/united-events-environment */ \"./node_modules/@ellementul/united-events-environment/index.js\");\n\nconst type = _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__.Types.Object.Def({\n  system: \"POS\",\n  entity: \"State of POS\"\n}, true);\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,_ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__.EventFactory)(type));\n\n//# sourceURL=webpack://App/./members/POS/events/show.js?");
+
+/***/ }),
+
+/***/ "./members/POS/index.js":
+/*!******************************!*\
+  !*** ./members/POS/index.js ***!
+  \******************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   POS: () => (/* binding */ POS),\n/* harmony export */   events: () => (/* binding */ exportEvents)\n/* harmony export */ });\n/* harmony import */ var _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ellementul/united-events-environment */ \"./node_modules/@ellementul/united-events-environment/index.js\");\n/* harmony import */ var _events_show_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./events/show.js */ \"./members/POS/events/show.js\");\n\nconst {\n  openEvent\n} = _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__.events;\n\nclass POS extends _ellementul_united_events_environment__WEBPACK_IMPORTED_MODULE_0__.Member {\n  constructor() {\n    super();\n    this.onEvent(openEvent, () => this.show());\n    this.role = \"POS\";\n  }\n  show() {\n    this.send(_events_show_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"], {\n      state: {}\n    });\n  }\n}\nconst exportEvents = {\n  show: _events_show_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"]\n};\n\n\n//# sourceURL=webpack://App/./members/POS/index.js?");
 
 /***/ }),
 

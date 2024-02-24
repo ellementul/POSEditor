@@ -1,7 +1,7 @@
 import { Member, events } from '@ellementul/united-events-environment'
 const { openEvent } = events
 
-import showEvent from './events/show'
+import showEvent from './events/show.js'
 class POS extends Member {
   constructor() {
     super()
