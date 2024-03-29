@@ -24,6 +24,8 @@
   },
   "homepage": "https://github.com/ellementul/POSEditor#readme",
   "dependencies": {
+    "@ellementul/pos-member": "^0.3.0",
+    "@ellementul/ui-game-grid": "^0.3.0",
     "@ellementul/united-events-environment": "^2.0.3"
   },
   "devDependencies": {

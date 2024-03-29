@@ -1,12 +1,12 @@
-const { UnitedEventsEnv, Room } = require('@ellementul/united-events-environment')
-const { Logging } = require('./logging')
+import { UnitedEventsEnv, Room } from '@ellementul/united-events-environment'
+import { Logging } from './logging'
 
-const { Ticker } = require('@ellementul/uee-timeticker')
-const { POS } = require('./members/POS')
+import { POSMember } from '@ellementul/pos-member'
+import { UIMember } from './members/ui/index.js'
 
 const room = new Room
-room.addMember(Ticker)
-room.addMember(POS)
+room.addMember(POSMember)
+room.addMember(UIMember)
 
 const env = new UnitedEventsEnv(room)
 env.baseUrl = "./"
