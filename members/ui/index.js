@@ -1,4 +1,5 @@
-import { Member } from '@ellementul/united-events-environment'
+import { Member, events } from '@ellementul/united-events-environment'
+import { Grid } from '@ellementul/ui-game-grid'
 
 import showUIEvent from './events/showUI_event.js' 
 
@@ -6,17 +7,22 @@ class UIMember extends Member {
   constructor() {
     super()
 
-    this.onEvent(showUIEvent, () => this.callback()) // Subscribing on event
+    this.grid = new Grid
+
+    this.onEvent(events.buildEvent, () => this.createUI()) // Subscribing on event
     
     this.role = "UI"
   }
 
-  callback () {
-    console.log("showUIEvent!!!!!!!!!!!!!!!!!!!!!!!!!")
-    // this.send(yourEvent, {
-    //   state: "NewYourStateOfYourEntity" // Fill the state property in the event
-    //   // If we don't fill the property, this property will be random.
-    // })
+  createUI () {
+    this.grid.createBox({
+      name: "HelloBlock",
+      top: 3,
+      left: 3,
+      right: 3,
+      bottom: 3,
+      centred: true
+    })
   }
 }
 

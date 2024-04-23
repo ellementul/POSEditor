@@ -1,7 +1,7 @@
 {
-  "name": "POSEditor",
+  "name": "PosetEditor",
   "version": "0.1.0",
-  "description": "Editor",
+  "description": "Partially ordered set Editor",
   "main": "index.html",
   "chromium-args": "--mixed-context",
   "scripts": {
@@ -25,7 +25,7 @@
   "homepage": "https://github.com/ellementul/POSEditor#readme",
   "dependencies": {
     "@ellementul/pos-member": "^0.3.0",
-    "@ellementul/ui-game-grid": "^0.3.0",
+    "@ellementul/ui-game-grid": "^0.4.1",
     "@ellementul/united-events-environment": "^2.0.3"
   },
   "devDependencies": {

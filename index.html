@@ -3,13 +3,15 @@
   <head>
     <title>POSEditor</title>
   </head>
-  <body>
+  <body style="margin:0; overflow: hidden;">
     <script  type="module">
       await import('./data/index.js')
 
       const win = nw.Window.get()
       // win.enterFullscreen()
       win.showDevTools()
+
+      
     </script>
   </body>
 </html>
