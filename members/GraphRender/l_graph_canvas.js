@@ -1,4 +1,10 @@
-import { pointerListenerAdd, pointerListenerRemove, pointerevents_method } from './libs.js'
+import { 
+    getTime, 
+    pointerListenerAdd, 
+    pointerListenerRemove, 
+    pointerevents_method 
+} from './libs.js'
+
 import { LiteGraph } from './litegraph_class.js'
 
 import { LGraphGroup } from './l_graph_group.js'
@@ -660,7 +666,7 @@ LGraphCanvas.prototype.processMouseDown = function(e) {
     var node = this.graph.getNodeOnPos( e.canvasX, e.canvasY, this.visible_nodes, 5 );
     var skip_dragging = false;
     var skip_action = false;
-    var now = LiteGraph.getTime();
+    var now = getTime();
     var is_primary = (e.isPrimary === undefined || !e.isPrimary);
     var is_double_click = (now - this.last_mouseclick < 300) && is_primary;
     this.mouse[0] = e.clientX;
@@ -1085,7 +1091,7 @@ LGraphCanvas.prototype.processMouseDown = function(e) {
 
     this.last_mouse[0] = e.clientX;
     this.last_mouse[1] = e.clientY;
-    this.last_mouseclick = LiteGraph.getTime();
+    this.last_mouseclick = getTime();
     this.last_mouse_dragging = true;
 
     /*
@@ -1409,7 +1415,7 @@ LGraphCanvas.prototype.processMouseUp = function(e) {
     }
 
     this.adjustMouseEvent(e);
-    var now = LiteGraph.getTime();
+    var now = getTime();
     e.click_time = now - this.last_mouseclick;
     this.last_mouse_dragging = false;
     this.last_click_position = null;
@@ -2515,7 +2521,7 @@ LGraphCanvas.prototype.draw = function(force_canvas, force_bgcanvas) {
     }
 
     //fps counting
-    var now = LiteGraph.getTime();
+    var now = getTime();
     this.render_time = (now - this.last_draw_time) * 0.001;
     this.last_draw_time = now;
 
@@ -4056,7 +4062,7 @@ var tempB = new Float32Array(2);
  * @method drawConnections
  **/
 LGraphCanvas.prototype.drawConnections = function(ctx) {
-    var now = LiteGraph.getTime();
+    var now = getTime();
     var visible_area = this.visible_area;
     margin_area[0] = visible_area[0] - 20;
     margin_area[1] = visible_area[1] - 20;
@@ -4447,7 +4453,7 @@ LGraphCanvas.prototype.renderLink = function(
     if (flow) {
         ctx.fillStyle = color;
         for (var i = 0; i < 5; ++i) {
-            var f = (LiteGraph.getTime() * 0.001 + i * 0.2) % 1;
+            var f = (getTime() * 0.001 + i * 0.2) % 1;
             var pos = this.computeConnectionPoint(
                 a,
                 b,

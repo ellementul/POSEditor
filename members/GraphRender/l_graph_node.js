@@ -1,3 +1,5 @@
+import { getTime, uuidv4, cloneObject } from './libs.js'
+
 import { LiteGraph } from './litegraph_class.js'
 import { LLink } from './l_link.js'
 // *************************************************************
@@ -87,7 +89,7 @@ LGraphNode.prototype._ctor = function(title) {
     });
 
     if (LiteGraph.use_uuids) {
-        this.id = LiteGraph.uuidv4();
+        this.id = uuidv4();
     }
     else {
         this.id = -1; //not know till not added
@@ -133,7 +135,7 @@ LGraphNode.prototype.configure = function(info) {
             if (this[j] && this[j].configure) {
                 this[j].configure(info[j]);
             } else {
-                this[j] = LiteGraph.cloneObject(info[j], this[j]);
+                this[j] = cloneObject(info[j], this[j]);
             }
         } //value
         else {
@@ -211,7 +213,7 @@ LGraphNode.prototype.serialize = function() {
         type: this.type,
         pos: this.pos,
         size: this.size,
-        flags: LiteGraph.cloneObject(this.flags),
+        flags: cloneObject(this.flags),
         order: this.order,
         mode: this.mode
     };
@@ -238,7 +240,7 @@ LGraphNode.prototype.serialize = function() {
     }
 
     if (this.properties) {
-        o.properties = LiteGraph.cloneObject(this.properties);
+        o.properties = cloneObject(this.properties);
     }
 
     if (this.widgets && this.serialize_widgets) {
@@ -287,7 +289,7 @@ LGraphNode.prototype.clone = function() {
     }
 
     //we clone it because serialize returns shared containers
-    var data = LiteGraph.cloneObject(this.serialize());
+    var data = cloneObject(this.serialize());
 
     //remove links
     if (data.inputs) {
@@ -307,7 +309,7 @@ LGraphNode.prototype.clone = function() {
     delete data["id"];
 
     if (LiteGraph.use_uuids) {
-        data["id"] = LiteGraph.uuidv4()
+        data["id"] = uuidv4()
     }
 
     //remove links
@@ -868,7 +870,7 @@ LGraphNode.prototype.trigger = function(action, param, options) {
     }
 
     if (this.graph)
-        this.graph._last_trigger_time = LiteGraph.getTime();
+        this.graph._last_trigger_time = getTime();
 
     for (var i = 0; i < this.outputs.length; ++i) {
         var output = this.outputs[i];
@@ -911,7 +913,7 @@ LGraphNode.prototype.triggerSlot = function(slot, param, link_id, options) {
     }
 
     if (this.graph) {
-        this.graph._last_trigger_time = LiteGraph.getTime();
+        this.graph._last_trigger_time = getTime();
     }
 
     //for every link attached here
@@ -926,7 +928,7 @@ LGraphNode.prototype.triggerSlot = function(slot, param, link_id, options) {
             //not connected
             continue;
         }
-        link_info._last_time = LiteGraph.getTime();
+        link_info._last_time = getTime();
         var node = this.graph.getNodeById(link_info.target_id);
         if (!node) {
             //node not found?
@@ -2006,7 +2008,7 @@ LGraphNode.prototype.connect = function(slot, target_node, target_slot) {
 
     var nextId
     if (LiteGraph.use_uuids)
-        nextId = LiteGraph.uuidv4();
+        nextId = uuidv4();
     else
         nextId = ++this.graph.last_link_id;
     

@@ -1,8 +1,12 @@
+import { getTime, uuidv4 } from './libs.js'
+
 import { LLink } from './l_link.js'
 import { LGraphNode } from './l_graph_node.js'
 import { LGraphGroup } from './l_graph_group.js'
 import { LiteGraph } from './litegraph_class.js'
 import { LGraphCanvas } from './l_graph_canvas.js'
+
+import { debug } from './settings.js'
 
 
 //*********************************************************************************
@@ -22,9 +26,6 @@ import { LGraphCanvas } from './l_graph_canvas.js'
     */
 
     function LGraph(o) {
-        if (LiteGraph.debug) {
-            console.log("Graph created");
-        }
         this.list_of_graphcanvas = null;
         this.clear();
 
@@ -172,7 +173,7 @@ import { LGraphCanvas } from './l_graph_canvas.js'
         this.sendEventToAllNodes("onStart");
 
         //launch
-        this.starttime = LiteGraph.getTime();
+        this.starttime = getTime();
         this.last_update_time = this.starttime;
         interval = interval || 0;
         var that = this;
@@ -241,7 +242,7 @@ import { LGraphCanvas } from './l_graph_canvas.js'
     LGraph.prototype.runStep = function(num, do_not_catch_errors, limit ) {
         num = num || 1;
 
-        var start = LiteGraph.getTime();
+        var start = getTime();
         this.globaltime = 0.001 * (start - this.starttime);
 
         //not optimal: executes possible pending actions in node, problem is it is not optimized
@@ -307,14 +308,14 @@ import { LGraphCanvas } from './l_graph_canvas.js'
                 if (LiteGraph.throw_errors) {
                     throw err;
                 }
-                if (LiteGraph.debug) {
+                if (debug) {
                     console.log("Error during execution: " + err);
                 }
                 this.stop();
             }
         }
 
-        var now = LiteGraph.getTime();
+        var now = getTime();
         var elapsed = now - start;
         if (elapsed == 0) {
             elapsed = 1;
@@ -455,7 +456,7 @@ import { LGraphCanvas } from './l_graph_canvas.js'
             L.push(M[i]);
         }
 
-        if (L.length != this._nodes.length && LiteGraph.debug) {
+        if (L.length != this._nodes.length && debug) {
             console.warn("something went wrong, nodes missing");
         }
 
@@ -674,7 +675,7 @@ import { LGraphCanvas } from './l_graph_canvas.js'
                 "LiteGraph: there is already a node with this ID, changing it"
             );
             if (LiteGraph.use_uuids) {
-                node.id = LiteGraph.uuidv4();
+                node.id = uuidv4();
             }
             else {
                 node.id = ++this.last_node_id;
@@ -688,7 +689,7 @@ import { LGraphCanvas } from './l_graph_canvas.js'
         //give him an id
         if (LiteGraph.use_uuids) {
             if (node.id == null || node.id == -1)
-                node.id = LiteGraph.uuidv4();
+                node.id = uuidv4();
         }
         else {
             if (node.id == null || node.id == -1) {
@@ -1334,9 +1335,6 @@ import { LGraphCanvas } from './l_graph_canvas.js'
 
     /* Called when something visually changed (not the graph!) */
     LGraph.prototype.change = function() {
-        if (LiteGraph.debug) {
-            console.log("Graph changed");
-        }
         this.sendActionToCanvas("setDirty", [true, true]);
         if (this.on_change) {
             this.on_change(this);
@@ -1468,7 +1466,7 @@ import { LGraphCanvas } from './l_graph_canvas.js'
                 var n_info = nodes[i]; //stored info
                 var node = LiteGraph.createNode(n_info.type, n_info.title);
                 if (!node) {
-                    if (LiteGraph.debug) {
+                    if (debug) {
                         console.log(
                             "Node not found or has errors: " + n_info.type
                         );

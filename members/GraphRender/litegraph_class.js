@@ -330,10 +330,7 @@ var LiteGraph = {
      * @param {String} name node name with namespace (p.e.: 'math/sum')
      * @param {Object} object methods expected onCreate, inputs, outputs, properties, onExecute
      */
-        buildNodeClassFromObject: function(
-        name,
-        object
-    ) {
+    buildNodeClassFromObject: function(name, object) {
         var ctor_code = "";
         if(object.inputs)
         for(var i=0; i < object.inputs.length; ++i)
@@ -648,29 +645,6 @@ var LiteGraph = {
         }
     },
 
-    //separated just to improve if it doesn't work
-    cloneObject: function(obj, target) {
-        if (obj == null) {
-            return null;
-        }
-        var r = JSON.parse(JSON.stringify(obj));
-        if (!target) {
-            return r;
-        }
-
-        for (var i in r) {
-            target[i] = r[i];
-        }
-        return target;
-    },
-
-    /*
-        * https://gist.github.com/jed/982883?permalink_comment_id=852670#gistcomment-852670
-        */
-    uuidv4: function() {
-        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,a=>(a^Math.random()*16>>a/4).toString(16));
-    },
-
     /**
      * Returns if the types of two slots are compatible (taking into account wildcards, etc)
      * @method isValidConnection
@@ -714,116 +688,7 @@ var LiteGraph = {
         }
 
         return false;
-    },
-
-    /**
-     * Register a string in the search box so when the user types it it will recommend this node
-     * @method registerSearchboxExtra
-     * @param {String} node_type the node recommended
-     * @param {String} description text to show next to it
-     * @param {Object} data it could contain info of how the node should be configured
-     * @return {Boolean} true if they can be connected
-     */
-    registerSearchboxExtra: function(node_type, description, data) {
-        this.searchbox_extras[description.toLowerCase()] = {
-            type: node_type,
-            desc: description,
-            data: data
-        };
-    },
-
-    /**
-     * Wrapper to load files (from url using fetch or from file using FileReader)
-     * @method fetchFile
-     * @param {String|File|Blob} url the url of the file (or the file itself)
-     * @param {String} type an string to know how to fetch it: "text","arraybuffer","json","blob"
-     * @param {Function} on_complete callback(data)
-     * @param {Function} on_error in case of an error
-     * @return {FileReader|Promise} returns the object used to 
-     */
-    fetchFile: function( url, type, on_complete, on_error ) {
-        var that = this;
-        if(!url)
-            return null;
-
-        type = type || "text";
-        if( url.constructor === String )
-        {
-            if (url.substr(0, 4) == "http" && LiteGraph.proxy) {
-                url = LiteGraph.proxy + url.substr(url.indexOf(":") + 3);
-            }
-            return fetch(url)
-            .then(function(response) {
-                if(!response.ok)
-                        throw new Error("File not found"); //it will be catch below
-                if(type == "arraybuffer")
-                    return response.arrayBuffer();
-                else if(type == "text" || type == "string")
-                    return response.text();
-                else if(type == "json")
-                    return response.json();
-                else if(type == "blob")
-                    return response.blob();
-            })
-            .then(function(data) {
-                if(on_complete)
-                    on_complete(data);
-            })
-            .catch(function(error) {
-                console.error("error fetching file:",url);
-                if(on_error)
-                    on_error(error);
-            });
-        }
-        else if( url.constructor === File || url.constructor === Blob)
-        {
-            var reader = new FileReader();
-            reader.onload = function(e)
-            {
-                var v = e.target.result;
-                if( type == "json" )
-                    v = JSON.parse(v);
-                if(on_complete)
-                    on_complete(v);
-            }
-            if(type == "arraybuffer")
-                return reader.readAsArrayBuffer(url);
-            else if(type == "text" || type == "json")
-                return reader.readAsText(url);
-            else if(type == "blob")
-                return reader.readAsBinaryString(url);
-        }
-        return null;
     }
 }
-
-//timer that works everywhere
-if (typeof performance != "undefined") {
-    LiteGraph.getTime = performance.now.bind(performance);
-} else if (typeof Date != "undefined" && Date.now) {
-    LiteGraph.getTime = Date.now.bind(Date);
-} else if (typeof process != "undefined") {
-    LiteGraph.getTime = function() {
-        var t = process.hrtime();
-        return t[0] * 0.001 + t[1] * 1e-6;
-    };
-} else {
-    LiteGraph.getTime = function getTime() {
-        return new Date().getTime();
-    };
-}
-
-//used to create nodes from wrapping functions
-LiteGraph.getParameterNames = function(func) {
-    return (func + "")
-        .replace(/[/][/].*$/gm, "") // strip single-line comments
-        .replace(/\s+/g, "") // strip white space
-        .replace(/[/][*][^/*]*[*][/]/g, "") // strip multi-line comments  /**/
-        .split("){", 1)[0]
-        .replace(/^[^(]*[(]/, "") // extract the parameters
-        .replace(/=[^,]+/g, "") // strip any ES6 defaults
-        .split(",")
-        .filter(Boolean); // split & filter [""]
-};
 
 export { LiteGraph }
