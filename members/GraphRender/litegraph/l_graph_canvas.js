@@ -17,7 +17,9 @@ import {
     NODE_SLOT_HEIGHT,
     NODE_WIDGET_HEIGHT,
     NODE_TEXT_SIZE,
-    SHAPES
+    SHAPES,
+    EVENT,
+    ACTION
 } from './settings.js'
 
 const NODE_TITLE_TEXT_Y = 20
@@ -46,6 +48,24 @@ const EVENT_LINK_COLOR = "#A86"
 const CONNECTING_LINK_COLOR = "#AFA"
 
 const VALID_SHAPES = ["default", "box", "round", "card"] //,"circle"
+
+const LINK_RENDER_MODES = ["Straight", "Linear", "Spline"]
+const STRAIGHT_LINK = 0
+const LINEAR_LINK = 1
+const SPLINE_LINK = 2
+
+const NORMAL_TITLE = 0
+const NO_TITLE = 1
+const TRANSPARENT_TITLE = 2
+const AUTOHIDE_TITLE = 3
+
+const CONNECTION_DIRECTS = { 
+    UP: 1,
+    DOWN: 2,
+    LEFT: 3,
+    RIGHT: 4,
+    CENTER: 5
+}
 
 /*********************************************************************************
 // LGraphCanvas: LGraph renderer CLASS
@@ -134,7 +154,7 @@ function LGraphCanvas(canvas, graph, options) {
     this.render_title_colored = true;
     this.render_link_tooltip = true;
 
-    this.links_render_mode = LiteGraph.SPLINE_LINK;
+    this.links_render_mode = SPLINE_LINK;
 
     this.mouse = [0, 0]; //mouse in canvas coordinates, where 0,0 is the top-left corner of the blue rectangle
     this.graph_mouse = [0, 0]; //mouse in graph coordinates, where 0,0 is the top-left corner of the blue rectangle
@@ -1534,14 +1554,14 @@ LGraphCanvas.prototype.processMouseUp = function(e) {
                 
                 /* no need to condition on event type.. just another type
                 if (
-                    connType == LiteGraph.EVENT &&
+                    connType == EVENT &&
                     this.isOverNodeBox(node, e.canvasX, e.canvasY)
                 ) {
                     
                     this.connecting_node.connect(
                         this.connecting_slot,
                         node,
-                        LiteGraph.EVENT
+                        EVENT
                     );
                     
                 } else {*/
@@ -2634,14 +2654,14 @@ LGraphCanvas.prototype.drawFrontCanvas = function() {
             if(connDir == null)
             {
                 if (this.connecting_output)
-                    connDir = this.connecting_node.horizontal ? LiteGraph.DOWN : LiteGraph.RIGHT;
+                    connDir = this.connecting_node.horizontal ? CONNECTION_DIRECTS.DOWN : CONNECTION_DIRECTS.RIGHT;
                 else
-                    connDir = this.connecting_node.horizontal ? LiteGraph.UP : LiteGraph.LEFT;
+                    connDir = this.connecting_node.horizontal ? CONNECTION_DIRECTS.UP : CONNECTION_DIRECTS.LEFT;
             }
             var connShape = connInOrOut.shape;
             
             switch (connType) {
-                case LiteGraph.EVENT:
+                case EVENT:
                     link_color = EVENT_LINK_COLOR;
                     break;
                 default:
@@ -2658,12 +2678,12 @@ LGraphCanvas.prototype.drawFrontCanvas = function() {
                 null,
                 link_color,
                 connDir,
-                LiteGraph.CENTER
+                CONNECTION_DIRECTS.CENTER
             );
 
             ctx.beginPath();
             if (
-                connType === LiteGraph.EVENT ||
+                connType === EVENT ||
                 connShape === SHAPES.BOX_SHAPE
             ) {
                 ctx.rect(
@@ -3378,7 +3398,7 @@ LGraphCanvas.prototype.drawNode = function(node, ctx) {
                 var doStroke = true;
                 
                 if (
-                    slot.type === LiteGraph.EVENT ||
+                    slot.type === EVENT ||
                     slot.shape === SHAPES.BOX_SHAPE
                 ) {
                     if (horizontal) {
@@ -3425,7 +3445,7 @@ LGraphCanvas.prototype.drawNode = function(node, ctx) {
                     var text = slot.label != null ? slot.label : slot.name;
                     if (text) {
                         ctx.fillStyle = NODE_TEXT_COLOR;
-                        if (horizontal || slot.dir == LiteGraph.UP) {
+                        if (horizontal || slot.dir == CONNECTION_DIRECTS.UP) {
                             ctx.fillText(text, pos[0], pos[1] - 10);
                         } else {
                             ctx.fillText(text, pos[0] + 10, pos[1] + 5);
@@ -3477,7 +3497,7 @@ LGraphCanvas.prototype.drawNode = function(node, ctx) {
                 var doStroke = true;
                 
                 if (
-                    slot_type === LiteGraph.EVENT ||
+                    slot_type === EVENT ||
                     slot_shape === SHAPES.BOX_SHAPE
                 ) {
                     if (horizontal) {
@@ -3532,7 +3552,7 @@ LGraphCanvas.prototype.drawNode = function(node, ctx) {
                     var text = slot.label != null ? slot.label : slot.name;
                     if (text) {
                         ctx.fillStyle = NODE_TEXT_COLOR;
-                        if (horizontal || slot.dir == LiteGraph.DOWN) {
+                        if (horizontal || slot.dir == CONNECTION_DIRECTS.DOWN) {
                             ctx.fillText(text, pos[0], pos[1] - 8);
                         } else {
                             ctx.fillText(text, pos[0] - 10, pos[1] + 5);
@@ -3597,7 +3617,7 @@ LGraphCanvas.prototype.drawNode = function(node, ctx) {
             ctx.fillStyle = "#686";
             ctx.beginPath();
             if (
-                slot.type === LiteGraph.EVENT ||
+                slot.type === EVENT ||
                 slot.shape === SHAPES.BOX_SHAPE
             ) {
                 ctx.rect(x - 7 + 0.5, y - 4, 14, 8);
@@ -3623,7 +3643,7 @@ LGraphCanvas.prototype.drawNode = function(node, ctx) {
             ctx.strokeStyle = "black";
             ctx.beginPath();
             if (
-                slot.type === LiteGraph.EVENT ||
+                slot.type === EVENT ||
                 slot.shape === SHAPES.BOX_SHAPE
             ) {
                 ctx.rect(x - 7 + 0.5, y - 4, 14, 8);
@@ -3731,9 +3751,9 @@ LGraphCanvas.prototype.drawNodeShape = function(
     var title_mode = node.constructor.title_mode;
 
     var render_title = true;
-    if (title_mode == LiteGraph.TRANSPARENT_TITLE || title_mode == LiteGraph.NO_TITLE) {
+    if (title_mode == TRANSPARENT_TITLE || title_mode == NO_TITLE) {
         render_title = false;
-    } else if (title_mode == LiteGraph.AUTOHIDE_TITLE && mouse_over) {
+    } else if (title_mode == AUTOHIDE_TITLE && mouse_over) {
         render_title = true;
     }
 
@@ -3788,12 +3808,12 @@ LGraphCanvas.prototype.drawNodeShape = function(
     }
 
     //title bg (remember, it is rendered ABOVE the node)
-    if (render_title || title_mode == LiteGraph.TRANSPARENT_TITLE) {
+    if (render_title || title_mode == TRANSPARENT_TITLE) {
         //title bar
         if (node.onDrawTitleBar) {
             node.onDrawTitleBar( ctx, title_height, size, this.ds.scale, fgcolor );
         } else if (
-            title_mode != LiteGraph.TRANSPARENT_TITLE &&
+            title_mode != TRANSPARENT_TITLE &&
             (node.constructor.title_color || this.render_title_colored)
         ) {
             var title_color = node.constructor.title_color || fgcolor;
@@ -3975,7 +3995,7 @@ LGraphCanvas.prototype.drawNodeShape = function(
             node.onBounding(area);
         }
 
-        if (title_mode == LiteGraph.TRANSPARENT_TITLE) {
+        if (title_mode == TRANSPARENT_TITLE) {
             area[1] -= title_height;
             area[3] += title_height;
         }
@@ -4119,10 +4139,10 @@ LGraphCanvas.prototype.drawConnections = function(ctx) {
             }
             var start_dir =
                 start_slot.dir ||
-                (start_node.horizontal ? LiteGraph.DOWN : LiteGraph.RIGHT);
+                (start_node.horizontal ? CONNECTION_DIRECTS.DOWN : CONNECTION_DIRECTS.RIGHT);
             var end_dir =
                 end_slot.dir ||
-                (node.horizontal ? LiteGraph.UP : LiteGraph.LEFT);
+                (node.horizontal ? CONNECTION_DIRECTS.UP : CONNECTION_DIRECTS.LEFT);
 
             this.renderLink(
                 ctx,
@@ -4199,8 +4219,8 @@ LGraphCanvas.prototype.renderLink = function(
         color = "#FFF";
     }
 
-    start_dir = start_dir || LiteGraph.RIGHT;
-    end_dir = end_dir || LiteGraph.LEFT;
+    start_dir = start_dir || CONNECTION_DIRECTS.RIGHT;
+    end_dir = end_dir || CONNECTION_DIRECTS.LEFT;
 
     var dist = distance(a, b);
 
@@ -4218,37 +4238,37 @@ LGraphCanvas.prototype.renderLink = function(
     for (var i = 0; i < num_sublines; i += 1) {
         var offsety = (i - (num_sublines - 1) * 0.5) * 5;
 
-        if (this.links_render_mode == LiteGraph.SPLINE_LINK) {
+        if (this.links_render_mode == SPLINE_LINK) {
             ctx.moveTo(a[0], a[1] + offsety);
             var start_offset_x = 0;
             var start_offset_y = 0;
             var end_offset_x = 0;
             var end_offset_y = 0;
             switch (start_dir) {
-                case LiteGraph.LEFT:
+                case CONNECTION_DIRECTS.LEFT:
                     start_offset_x = dist * -0.25;
                     break;
-                case LiteGraph.RIGHT:
+                case CONNECTION_DIRECTS.RIGHT:
                     start_offset_x = dist * 0.25;
                     break;
-                case LiteGraph.UP:
+                case CONNECTION_DIRECTS.UP:
                     start_offset_y = dist * -0.25;
                     break;
-                case LiteGraph.DOWN:
+                case CONNECTION_DIRECTS.DOWN:
                     start_offset_y = dist * 0.25;
                     break;
             }
             switch (end_dir) {
-                case LiteGraph.LEFT:
+                case CONNECTION_DIRECTS.LEFT:
                     end_offset_x = dist * -0.25;
                     break;
-                case LiteGraph.RIGHT:
+                case CONNECTION_DIRECTS.RIGHT:
                     end_offset_x = dist * 0.25;
                     break;
-                case LiteGraph.UP:
+                case CONNECTION_DIRECTS.UP:
                     end_offset_y = dist * -0.25;
                     break;
-                case LiteGraph.DOWN:
+                case CONNECTION_DIRECTS.DOWN:
                     end_offset_y = dist * 0.25;
                     break;
             }
@@ -4260,37 +4280,37 @@ LGraphCanvas.prototype.renderLink = function(
                 b[0],
                 b[1] + offsety
             );
-        } else if (this.links_render_mode == LiteGraph.LINEAR_LINK) {
+        } else if (this.links_render_mode == LINEAR_LINK) {
             ctx.moveTo(a[0], a[1] + offsety);
             var start_offset_x = 0;
             var start_offset_y = 0;
             var end_offset_x = 0;
             var end_offset_y = 0;
             switch (start_dir) {
-                case LiteGraph.LEFT:
+                case CONNECTION_DIRECTS.LEFT:
                     start_offset_x = -1;
                     break;
-                case LiteGraph.RIGHT:
+                case CONNECTION_DIRECTS.RIGHT:
                     start_offset_x = 1;
                     break;
-                case LiteGraph.UP:
+                case CONNECTION_DIRECTS.UP:
                     start_offset_y = -1;
                     break;
-                case LiteGraph.DOWN:
+                case CONNECTION_DIRECTS.DOWN:
                     start_offset_y = 1;
                     break;
             }
             switch (end_dir) {
-                case LiteGraph.LEFT:
+                case CONNECTION_DIRECTS.LEFT:
                     end_offset_x = -1;
                     break;
-                case LiteGraph.RIGHT:
+                case CONNECTION_DIRECTS.RIGHT:
                     end_offset_x = 1;
                     break;
-                case LiteGraph.UP:
+                case CONNECTION_DIRECTS.UP:
                     end_offset_y = -1;
                     break;
-                case LiteGraph.DOWN:
+                case CONNECTION_DIRECTS.DOWN:
                     end_offset_y = 1;
                     break;
             }
@@ -4304,18 +4324,18 @@ LGraphCanvas.prototype.renderLink = function(
                 b[1] + end_offset_y * l + offsety
             );
             ctx.lineTo(b[0], b[1] + offsety);
-        } else if (this.links_render_mode == LiteGraph.STRAIGHT_LINK) {
+        } else if (this.links_render_mode == STRAIGHT_LINK) {
             ctx.moveTo(a[0], a[1]);
             var start_x = a[0];
             var start_y = a[1];
             var end_x = b[0];
             var end_y = b[1];
-            if (start_dir == LiteGraph.RIGHT) {
+            if (start_dir == CONNECTION_DIRECTS.RIGHT) {
                 start_x += 10;
             } else {
                 start_y += 10;
             }
-            if (end_dir == LiteGraph.LEFT) {
+            if (end_dir == CONNECTION_DIRECTS.LEFT) {
                 end_x -= 10;
             } else {
                 end_y -= 10;
@@ -4355,7 +4375,7 @@ LGraphCanvas.prototype.renderLink = function(
     if (
         this.ds.scale >= 0.6 &&
         this.highquality_render &&
-        end_dir != LiteGraph.CENTER
+        end_dir != CONNECTION_DIRECTS.CENTER
     ) {
         //render arrow
         if (this.render_connection_arrows) {
@@ -4453,8 +4473,8 @@ LGraphCanvas.prototype.computeConnectionPoint = function(
     start_dir,
     end_dir
 ) {
-    start_dir = start_dir || LiteGraph.RIGHT;
-    end_dir = end_dir || LiteGraph.LEFT;
+    start_dir = start_dir || CONNECTION_DIRECTS.RIGHT;
+    end_dir = end_dir || CONNECTION_DIRECTS.LEFT;
 
     var dist = distance(a, b);
     var p0 = a;
@@ -4463,30 +4483,30 @@ LGraphCanvas.prototype.computeConnectionPoint = function(
     var p3 = b;
 
     switch (start_dir) {
-        case LiteGraph.LEFT:
+        case CONNECTION_DIRECTS.LEFT:
             p1[0] += dist * -0.25;
             break;
-        case LiteGraph.RIGHT:
+        case CONNECTION_DIRECTS.RIGHT:
             p1[0] += dist * 0.25;
             break;
-        case LiteGraph.UP:
+        case CONNECTION_DIRECTS.UP:
             p1[1] += dist * -0.25;
             break;
-        case LiteGraph.DOWN:
+        case CONNECTION_DIRECTS.DOWN:
             p1[1] += dist * 0.25;
             break;
     }
     switch (end_dir) {
-        case LiteGraph.LEFT:
+        case CONNECTION_DIRECTS.LEFT:
             p2[0] += dist * -0.25;
             break;
-        case LiteGraph.RIGHT:
+        case CONNECTION_DIRECTS.RIGHT:
             p2[0] += dist * 0.25;
             break;
-        case LiteGraph.UP:
+        case CONNECTION_DIRECTS.UP:
             p2[1] += dist * -0.25;
             break;
-        case LiteGraph.DOWN:
+        case CONNECTION_DIRECTS.DOWN:
             p2[1] += dist * 0.25;
             break;
     }
@@ -5325,7 +5345,7 @@ LGraphCanvas.showMenuNodeOptionalInputs = function(
 
             entry[2].removable = true;
             var data = { content: label, value: entry };
-            if (entry[1] == LiteGraph.ACTION) {
+            if (entry[1] == ACTION) {
                 data.className = "event";
             }
             entries.push(data);
@@ -5422,7 +5442,7 @@ LGraphCanvas.showMenuNodeOptionalOutputs = function(
             }
             entry[2].removable = true;
             var data = { content: label, value: entry };
-            if (entry[1] == LiteGraph.EVENT) {
+            if (entry[1] == EVENT) {
                 data.className = "event";
             }
             entries.push(data);
@@ -5434,7 +5454,7 @@ LGraphCanvas.showMenuNodeOptionalOutputs = function(
     }
     if (LiteGraph.do_add_triggers_slots){ //canvas.allow_addOutSlot_onExecuted
         if (node.findOutputSlot("onExecuted") == -1){
-            entries.push({content: "On Executed", value: ["onExecuted", LiteGraph.EVENT, {nameLocked: true}], className: "event"}); //, opts: {}
+            entries.push({content: "On Executed", value: ["onExecuted", EVENT, {nameLocked: true}], className: "event"}); //, opts: {}
         }
     }
     // add callback for modifing the menu elements onMenuNodeOutputs
@@ -5709,7 +5729,7 @@ LGraphCanvas.prototype.createDefaultNodeForSlot = function(optPass) { // addNode
     }
     
     // check for defaults nodes for this slottype
-    var fromSlotType = slotX.type==LiteGraph.EVENT?"_event_":slotX.type;
+    var fromSlotType = slotX.type==EVENT?"_event_":slotX.type;
     var slotTypesDefault = isFrom ? LiteGraph.slot_types_default_out : LiteGraph.slot_types_default_in;
     if(slotTypesDefault && slotTypesDefault[fromSlotType]){
         if (slotX.link !== null) {
@@ -5855,7 +5875,7 @@ LGraphCanvas.prototype.showConnectionMenu = function(optPass) { // addNodeMenu f
     }
     
     // get defaults nodes for this slottype
-    var fromSlotType = slotX.type==LiteGraph.EVENT?"_event_":slotX.type;
+    var fromSlotType = slotX.type==EVENT?"_event_":slotX.type;
     var slotTypesDefault = isFrom ? LiteGraph.slot_types_default_out : LiteGraph.slot_types_default_in;
     if(slotTypesDefault && slotTypesDefault[fromSlotType]){
         if(typeof slotTypesDefault[fromSlotType] == "object" || typeof slotTypesDefault[fromSlotType] == "array"){
@@ -6291,7 +6311,7 @@ LGraphCanvas.prototype.showSearchBox = function(event, options) {
             var aSlots = LiteGraph.slot_types_in;
             var nSlots = aSlots.length; // this for object :: Object.keys(aSlots).length;
             
-            if (options.type_filter_in == LiteGraph.EVENT || options.type_filter_in == LiteGraph.ACTION)
+            if (options.type_filter_in == EVENT || options.type_filter_in == ACTION)
                 options.type_filter_in = "_event_";
             /* this will filter on * .. but better do it manually in case
             else if(options.type_filter_in === "" || options.type_filter_in === 0)
@@ -6318,7 +6338,7 @@ LGraphCanvas.prototype.showSearchBox = function(event, options) {
             var aSlots = LiteGraph.slot_types_out;
             var nSlots = aSlots.length; // this for object :: Object.keys(aSlots).length; 
             
-            if (options.type_filter_out == LiteGraph.EVENT || options.type_filter_out == LiteGraph.ACTION)
+            if (options.type_filter_out == EVENT || options.type_filter_out == ACTION)
                 options.type_filter_out = "_event_";
             /* this will filter on * .. but better do it manually in case
             else if(options.type_filter_out === "" || options.type_filter_out === 0)
@@ -6635,7 +6655,7 @@ LGraphCanvas.prototype.showSearchBox = function(event, options) {
                     
                     var sV = sIn.value;
                     if (opts.inTypeOverride!==false) sV = opts.inTypeOverride;
-                    //if (sV.toLowerCase() == "_event_") sV = LiteGraph.EVENT; // -1
+                    //if (sV.toLowerCase() == "_event_") sV = EVENT; // -1
                     
                     if(sIn && sV){
                         //console.log("will check filter against "+sV);
@@ -6654,7 +6674,7 @@ LGraphCanvas.prototype.showSearchBox = function(event, options) {
                     
                     var sV = sOut.value;
                     if (opts.outTypeOverride!==false) sV = opts.outTypeOverride;
-                    //if (sV.toLowerCase() == "_event_") sV = LiteGraph.EVENT; // -1
+                    //if (sV.toLowerCase() == "_event_") sV = EVENT; // -1
                     
                     if(sOut && sV){
                         //console.log("search will check filter against "+sV);
@@ -7235,7 +7255,7 @@ LGraphCanvas.prototype.showShowGraphOptionsPanel = function(refOpts, obEv, refMe
         }
         
         var aLinks = [ graphcanvas.links_render_mode ];
-        panel.addWidget( "combo", "Render mode", LiteGraph.LINK_RENDER_MODES[graphcanvas.links_render_mode], {key: "links_render_mode", values: LiteGraph.LINK_RENDER_MODES}, fUpdate);
+        panel.addWidget( "combo", "Render mode", LINK_RENDER_MODES[graphcanvas.links_render_mode], {key: "links_render_mode", values: LINK_RENDER_MODES}, fUpdate);
         
         panel.addSeparator();
         
@@ -7976,10 +7996,10 @@ LGraphCanvas.prototype.processContextMenu = function(node, event) {
         }
         options.title =
             (slot.input ? slot.input.type : slot.output.type) || "*";
-        if (slot.input && slot.input.type == LiteGraph.ACTION) {
+        if (slot.input && slot.input.type == ACTION) {
             options.title = "Action";
         }
-        if (slot.output && slot.output.type == LiteGraph.EVENT) {
+        if (slot.output && slot.output.type == EVENT) {
             options.title = "Event";
         }
     } else {

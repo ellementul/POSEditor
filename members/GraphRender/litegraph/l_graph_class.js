@@ -6,9 +6,15 @@ import { LGraphGroup } from './l_graph_group.js'
 import { LiteGraph } from './litegraph_class.js'
 import { LGraphCanvas } from './l_graph_canvas.js'
 
-import { debug, NODE_TITLE_HEIGHT, NODE_MODES_EXC } from './settings.js'
+import { 
+    debug, 
+    use_uuids,
+    NODE_TITLE_HEIGHT,
+    NODE_MODES_EXC
+} from './settings.js'
 
 const MAX_NUMBER_OF_NODES = 1000 //avoid infinite loops
+const VERTICAL_LAYOUT = "vertical" // arrange nodes vertically
 
 
 //*********************************************************************************
@@ -552,13 +558,13 @@ const MAX_NUMBER_OF_NODES = 1000 //avoid infinite loops
             let y = margin + NODE_TITLE_HEIGHT;
             for (let j = 0; j < column.length; ++j) {
                 const node = column[j];
-                node.pos[0] = (layout == LiteGraph.VERTICAL_LAYOUT) ? y : x;
-                node.pos[1] = (layout == LiteGraph.VERTICAL_LAYOUT) ? x : y;
-                const max_size_index = (layout == LiteGraph.VERTICAL_LAYOUT) ? 1 : 0;
+                node.pos[0] = (layout == VERTICAL_LAYOUT) ? y : x;
+                node.pos[1] = (layout == VERTICAL_LAYOUT) ? x : y;
+                const max_size_index = (layout == VERTICAL_LAYOUT) ? 1 : 0;
                 if (node.size[max_size_index] > max_size) {
                     max_size = node.size[max_size_index];
                 }
-                const node_size_index = (layout == LiteGraph.VERTICAL_LAYOUT) ? 0 : 1;
+                const node_size_index = (layout == VERTICAL_LAYOUT) ? 0 : 1;
                 y += node.size[node_size_index] + margin + NODE_TITLE_HEIGHT;
             }
             x += max_size + margin;
@@ -676,7 +682,7 @@ const MAX_NUMBER_OF_NODES = 1000 //avoid infinite loops
             console.warn(
                 "LiteGraph: there is already a node with this ID, changing it"
             );
-            if (LiteGraph.use_uuids) {
+            if (use_uuids) {
                 node.id = uuidv4();
             }
             else {
@@ -689,7 +695,7 @@ const MAX_NUMBER_OF_NODES = 1000 //avoid infinite loops
         }
 
         //give him an id
-        if (LiteGraph.use_uuids) {
+        if (use_uuids) {
             if (node.id == null || node.id == -1)
                 node.id = uuidv4();
         }

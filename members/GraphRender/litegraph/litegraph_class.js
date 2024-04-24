@@ -2,7 +2,9 @@ import { LGraphNode } from './l_graph_node.js'
 
 import {
     SHAPES,
-    NODE_MODES_EXC
+    NODE_MODES_EXC,
+    EVENT,
+    ACTION
 } from './settings.js'
 
 const DEFAULT_POSITION = [100, 100] //default node position
@@ -20,30 +22,8 @@ const DEFAULT_POSITION = [100, 100] //default node position
 
 var LiteGraph = {
 
-    EVENT: -1, //for outputs
-    ACTION: -1, //for inputs
-
-    UP: 1,
-    DOWN: 2,
-    LEFT: 3,
-    RIGHT: 4,
-    CENTER: 5,
-
-    LINK_RENDER_MODES: ["Straight", "Linear", "Spline"], // helper
-    STRAIGHT_LINK: 0,
-    LINEAR_LINK: 1,
-    SPLINE_LINK: 2,
-
-    NORMAL_TITLE: 0,
-    NO_TITLE: 1,
-    TRANSPARENT_TITLE: 2,
-    AUTOHIDE_TITLE: 3,
-    VERTICAL_LAYOUT: "vertical", // arrange nodes vertically
-
-    proxy: null, //used to redirect calls
     node_images_path: "",
 
-    debug: false,
     catch_exceptions: true,
     throw_errors: true,
     allow_scripts: false, //if set to true some nodes like Formula would be allowed to evaluate code that comes from unsafe sources (like node configuration), which could lead to exploits
@@ -91,10 +71,6 @@ var LiteGraph = {
 
     ctrl_shift_v_paste_connect_unselected_outputs: false, //[true!] allows ctrl + shift + v to paste nodes with the outputs of the unselected nodes connected with the inputs of the newly pasted nodes
 
-    // if true, all newly created nodes/links will use string UUIDs for their id fields instead of integers.
-    // use this if you must have node IDs that are unique across all graphs and subgraphs.
-    use_uuids: false,
-
     /**
      * Register a node class so it can be listed when the user wants to create a new one
      * @method registerNodeType
@@ -107,10 +83,6 @@ var LiteGraph = {
             throw "Cannot register a simple object, it must be a class with a prototype";
         }
         base_class.type = type;
-
-        if (LiteGraph.debug) {
-            console.log("Node registered: " + type);
-        }
 
         const classname = base_class.name;
 
@@ -238,7 +210,7 @@ var LiteGraph = {
         let allTypes = [];
         if (typeof slot_type === "string") {
             allTypes = slot_type.split(",");
-        } else if (slot_type == this.EVENT || slot_type == this.ACTION) {
+        } else if (slot_type == EVENT || slot_type == ACTION) {
             allTypes = ["_event_"];
         } else {
             allTypes = ["*"];
@@ -421,11 +393,9 @@ var LiteGraph = {
     createNode: function(type, title, options) {
         var base_class = this.registered_node_types[type];
         if (!base_class) {
-            if (LiteGraph.debug) {
-                console.log(
-                    'GraphNode type "' + type + '" not registered.'
-                );
-            }
+            console.error(
+                'GraphNode type "' + type + '" not registered.'
+            );
             return null;
         }
 
@@ -573,9 +543,7 @@ var LiteGraph = {
             }
 
             try {
-                if (LiteGraph.debug) {
-                    console.log("Reloading: " + src);
-                }
+                console.log("Reloading: " + src);
                 var dynamicScript = document.createElement("script");
                 dynamicScript.type = "text/javascript";
                 dynamicScript.src = src;
@@ -585,15 +553,11 @@ var LiteGraph = {
                 if (LiteGraph.throw_errors) {
                     throw err;
                 }
-                if (LiteGraph.debug) {
-                    console.log("Error while reloading " + src);
-                }
+                console.error("Error while reloading " + src);
             }
         }
 
-        if (LiteGraph.debug) {
-            console.log("Nodes reloaded");
-        }
+        console.log("Nodes reloaded")
     },
 
     /**
@@ -610,7 +574,7 @@ var LiteGraph = {
             !type_a //generic output
             || !type_b // generic input
             || type_a == type_b //same type (is valid for triggers)
-            || (type_a == LiteGraph.EVENT && type_b == LiteGraph.ACTION)
+            || (type_a == EVENT && type_b == ACTION)
         ) {
             return true;
         }

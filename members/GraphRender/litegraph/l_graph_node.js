@@ -9,7 +9,10 @@ import {
     NODE_SLOT_HEIGHT,
     NODE_WIDGET_HEIGHT,
     NODE_TEXT_SIZE,
-    NODE_MODES_EXC
+    NODE_MODES_EXC,
+    EVENT,
+    ACTION,
+    use_uuids
 } from './settings.js'
 
 /**
@@ -53,7 +56,7 @@ LGraphNode.prototype._ctor = function(title) {
         enumerable: true
     });
 
-    if (LiteGraph.use_uuids) {
+    if (use_uuids) {
         this.id = uuidv4();
     }
     else {
@@ -273,7 +276,7 @@ LGraphNode.prototype.clone = function() {
 
     delete data["id"];
 
-    if (LiteGraph.use_uuids) {
+    if (use_uuids) {
         data["id"] = uuidv4()
     }
 
@@ -691,7 +694,7 @@ LGraphNode.prototype.getOutputNodes = function(slot) {
 LGraphNode.prototype.addOnTriggerInput = function(){
     var trigS = this.findInputSlot("onTrigger");
     if (trigS == -1){ //!trigS || 
-        var input = this.addInput("onTrigger", LiteGraph.EVENT, {optional: true, nameLocked: true});
+        var input = this.addInput("onTrigger", EVENT, {optional: true, nameLocked: true});
         return this.findInputSlot("onTrigger");
     }
     return trigS;
@@ -700,7 +703,7 @@ LGraphNode.prototype.addOnTriggerInput = function(){
 LGraphNode.prototype.addOnExecutedOutput = function(){
     var trigS = this.findOutputSlot("onExecuted");
     if (trigS == -1){ //!trigS || 
-        var output = this.addOutput("onExecuted", LiteGraph.ACTION, {optional: true, nameLocked: true});
+        var output = this.addOutput("onExecuted", ACTION, {optional: true, nameLocked: true});
         return this.findOutputSlot("onExecuted");
     }
     return trigS;
@@ -839,7 +842,7 @@ LGraphNode.prototype.trigger = function(action, param, options) {
 
     for (var i = 0; i < this.outputs.length; ++i) {
         var output = this.outputs[i];
-        if ( !output || output.type !== LiteGraph.EVENT || (action && output.name != action) )
+        if ( !output || output.type !== EVENT || (action && output.name != action) )
             continue;
         this.triggerSlot(i, param, null, options);
     }
@@ -1690,8 +1693,8 @@ LGraphNode.prototype.findSlotByType = function(input, type, returnObj, preferFre
         aDest = (aDest+"").toLowerCase().split(",");
         for(var sI=0;sI<aSource.length;sI++){
             for(var dI=0;dI<aDest.length;dI++){
-                if (aSource[sI]=="_event_") aSource[sI] = LiteGraph.EVENT;
-                if (aDest[sI]=="_event_") aDest[sI] = LiteGraph.EVENT;
+                if (aSource[sI]=="_event_") aSource[sI] = EVENT;
+                if (aDest[sI]=="_event_") aDest[sI] = EVENT;
                 if (aSource[sI]=="*") aSource[sI] = 0;
                 if (aDest[sI]=="*") aDest[sI] = 0;
                 if (aSource[sI] == aDest[dI]) {
@@ -1746,7 +1749,7 @@ LGraphNode.prototype.connectByType = function(slot, target_node, target_slotType
         return this.connect(slot, target_node, target_slot);
     }else{
         //console.log("type "+target_slotType+" not found or not free?")
-        if (opts.createEventInCase && target_slotType == LiteGraph.EVENT){
+        if (opts.createEventInCase && target_slotType == EVENT){
             // WILL CREATE THE onTrigger IN SLOT
             //console.debug("connect WILL CREATE THE onTrigger "+target_slotType+" to "+target_node);
             return this.connect(slot, target_node, -1);
@@ -1761,7 +1764,7 @@ LGraphNode.prototype.connectByType = function(slot, target_node, target_slotType
         }
         // connect to the first free input slot if not found a specific type and this output is general
         if (opts.firstFreeIfOutputGeneralInCase && (target_slotType == 0 || target_slotType == "*" || target_slotType == "")){
-            var target_slot = target_node.findInputSlotFree({typesNotAccepted: [LiteGraph.EVENT] });
+            var target_slot = target_node.findInputSlotFree({typesNotAccepted: [EVENT] });
             //console.debug("connect TO TheFirstFREE ",target_slotType," to ",target_node,"RES_SLOT:",target_slot);
             if (target_slot >= 0){
                 return this.connect(slot, target_node, target_slot);
@@ -1807,7 +1810,7 @@ LGraphNode.prototype.connectByTypeOutput = function(slot, source_node, source_sl
             }
         }
         
-        if (opts.createEventInCase && source_slotType == LiteGraph.EVENT){
+        if (opts.createEventInCase && source_slotType == EVENT){
             // WILL CREATE THE onExecuted OUT SLOT
             if (LiteGraph.do_add_triggers_slots){
                 var source_slot = source_node.addOnExecutedOutput();
@@ -1816,7 +1819,7 @@ LGraphNode.prototype.connectByTypeOutput = function(slot, source_node, source_sl
         }
         // connect to the first free output slot if not found a specific type and this input is general
         if (opts.firstFreeIfInputGeneralInCase && (source_slotType == 0 || source_slotType == "*" || source_slotType == "")){
-            var source_slot = source_node.findOutputSlotFree({typesNotAccepted: [LiteGraph.EVENT] });
+            var source_slot = source_node.findOutputSlotFree({typesNotAccepted: [EVENT] });
             if (source_slot >= 0){
                 return source_node.connect(source_slot, this, slot);
             }
@@ -1853,15 +1856,9 @@ LGraphNode.prototype.connect = function(slot, target_node, target_slot) {
     if (slot.constructor === String) {
         slot = this.findOutputSlot(slot);
         if (slot == -1) {
-            if (LiteGraph.debug) {
-                console.log("Connect: Error, no slot of name " + slot);
-            }
             return null;
         }
     } else if (!this.outputs || slot >= this.outputs.length) {
-        if (LiteGraph.debug) {
-            console.log("Connect: Error, slot number not found");
-        }
         return null;
     }
 
@@ -1881,14 +1878,9 @@ LGraphNode.prototype.connect = function(slot, target_node, target_slot) {
     if (target_slot.constructor === String) {
         target_slot = target_node.findInputSlot(target_slot);
         if (target_slot == -1) {
-            if (LiteGraph.debug) {
-                console.log(
-                    "Connect: Error, no slot of name " + target_slot
-                );
-            }
             return null;
         }
-    } else if (target_slot === LiteGraph.EVENT) {
+    } else if (target_slot === EVENT) {
         
         if (LiteGraph.do_add_triggers_slots){
             //search for first slot with event? :: NO this is done outside
@@ -1903,9 +1895,6 @@ LGraphNode.prototype.connect = function(slot, target_node, target_slot) {
         !target_node.inputs ||
         target_slot >= target_node.inputs.length
     ) {
-        if (LiteGraph.debug) {
-            console.log("Connect: Error, slot number not found");
-        }
         return null;
     }
 
@@ -1958,7 +1947,7 @@ LGraphNode.prototype.connect = function(slot, target_node, target_slot) {
     }
     if (output.links !== null && output.links.length){
         switch(output.type){
-            case LiteGraph.EVENT:
+            case EVENT:
                 if (!LiteGraph.allow_multi_output_for_events){
                     this.graph.beforeChange();
                     this.disconnectOutput(slot, false, {doProcessChange: false}); // Input(target_slot, {doProcessChange: false});
@@ -1971,7 +1960,7 @@ LGraphNode.prototype.connect = function(slot, target_node, target_slot) {
     }
 
     var nextId
-    if (LiteGraph.use_uuids)
+    if (use_uuids)
         nextId = uuidv4();
     else
         nextId = ++this.graph.last_link_id;
@@ -2052,15 +2041,9 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node) {
     if (slot.constructor === String) {
         slot = this.findOutputSlot(slot);
         if (slot == -1) {
-            if (LiteGraph.debug) {
-                console.log("Connect: Error, no slot of name " + slot);
-            }
             return false;
         }
     } else if (!this.outputs || slot >= this.outputs.length) {
-        if (LiteGraph.debug) {
-            console.log("Connect: Error, slot number not found");
-        }
         return false;
     }
 
@@ -2209,15 +2192,9 @@ LGraphNode.prototype.disconnectInput = function(slot) {
     if (slot.constructor === String) {
         slot = this.findInputSlot(slot);
         if (slot == -1) {
-            if (LiteGraph.debug) {
-                console.log("Connect: Error, no slot of name " + slot);
-            }
             return false;
         }
     } else if (!this.inputs || slot >= this.inputs.length) {
-        if (LiteGraph.debug) {
-            console.log("Connect: Error, slot number not found");
-        }
         return false;
     }
 
