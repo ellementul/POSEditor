@@ -3,61 +3,13 @@ import { getTime, uuidv4, cloneObject } from './libs.js'
 import { LiteGraph } from './litegraph_class.js'
 import { LLink } from './l_link.js'
 
-import { CANVAS_GRID_SIZE, NODE_TITLE_HEIGHT } from './settings.js'
-// *************************************************************
-//   Node CLASS                                          *******
-// *************************************************************
-
-/*
-title: string
-pos: [x,y]
-size: [x,y]
-
-input|output: every connection
-    +  { name:string, type:string, pos: [x,y]=Optional, direction: "input"|"output", links: Array });
-
-general properties:
-    + clip_area: if you render outside the node, it will be clipped
-    + unsafe_execution: not allowed for safe execution
-    + skip_repeated_outputs: when adding new outputs, it wont show if there is one already connected
-    + resizable: if set to false it wont be resizable with the mouse
-    + horizontal: slots are distributed horizontally
-    + widgets_start_y: widgets start at y distance from the top of the node
-
-flags object:
-    + collapsed: if it is collapsed
-
-supported callbacks:
-    + onAdded: when added to graph (warning: this is called BEFORE the node is configured when loading)
-    + onRemoved: when removed from graph
-    + onStart:	when the graph starts playing
-    + onStop:	when the graph stops playing
-    + onDrawForeground: render the inside widgets inside the node
-    + onDrawBackground: render the background area inside the node (only in edit mode)
-    + onMouseDown
-    + onMouseMove
-    + onMouseUp
-    + onMouseEnter
-    + onMouseLeave
-    + onExecute: execute the node
-    + onPropertyChanged: when a property is changed in the panel (return true to skip default behaviour)
-    + onGetInputs: returns an array of possible inputs
-    + onGetOutputs: returns an array of possible outputs
-    + onBounding: in case this node has a bigger bounding than the node itself (the callback receives the bounding as [x,y,w,h])
-    + onDblClick: double clicked in the node
-    + onInputDblClick: input slot double clicked (can be used to automatically create a node connected)
-    + onOutputDblClick: output slot double clicked (can be used to automatically create a node connected)
-    + onConfigure: called after the node has been configured
-    + onSerialize: to add extra info when serializing (the callback receives the object that should be filled with the data)
-    + onSelected
-    + onDeselected
-    + onDropItem : DOM item dropped over the node
-    + onDropFile : file dropped over the node
-    + onConnectInput : if returns false the incoming connection will be canceled
-    + onConnectionsChange : a connection changed (new one or removed) (LiteGraph.INPUT or LiteGraph.OUTPUT, slot, true if connected, link_info, input_info )
-    + onAction: action slot triggered
-    + getExtraMenuOptions: to add option to context menu
-*/
+import {
+    CANVAS_GRID_SIZE, 
+    NODE_TITLE_HEIGHT,
+    NODE_SLOT_HEIGHT,
+    NODE_WIDGET_HEIGHT,
+    NODE_TEXT_SIZE
+} from './settings.js'
 
 /**
  * Base Class for all the node type classes
@@ -65,13 +17,22 @@ supported callbacks:
  * @param {String} name a name for the node
  */
 
+const NODE_WIDTH = 140
+const NODE_COLLAPSED_WIDTH = 80
+
+const IN_OUT_PUT = {
+    //enums
+    INPUT: 1,
+    OUTPUT: 2,
+}
+
 function LGraphNode(title) {
     this._ctor(title);
 }
 
 LGraphNode.prototype._ctor = function(title) {
     this.title = title || "Unnamed";
-    this.size = [LiteGraph.NODE_WIDTH, 60];
+    this.size = [NODE_WIDTH, 60];
     this.graph = null;
 
     this._pos = new Float32Array(10, 10);
@@ -154,7 +115,7 @@ LGraphNode.prototype.configure = function(info) {
             var input = this.inputs[i];
             var link_info = this.graph ? this.graph.links[input.link] : null;
             if (this.onConnectionsChange)
-                this.onConnectionsChange( LiteGraph.INPUT, i, true, link_info, input ); //link_info has been created now, so its updated
+                this.onConnectionsChange( IN_OUT_PUT.INPUT, i, true, link_info, input ); //link_info has been created now, so its updated
 
             if( this.onInputAdded )
                 this.onInputAdded(input);
@@ -171,7 +132,7 @@ LGraphNode.prototype.configure = function(info) {
             for (var j = 0; j < output.links.length; ++j) {
                 var link_info = this.graph 	? this.graph.links[output.links[j]] : null;
                 if (this.onConnectionsChange)
-                    this.onConnectionsChange( LiteGraph.OUTPUT, i, true, link_info, output ); //link_info has been created now, so its updated
+                    this.onConnectionsChange( IN_OUT_PUT.OUTPUT, i, true, link_info, output ); //link_info has been created now, so its updated
             }
 
             if( this.onOutputAdded )
@@ -1268,7 +1229,7 @@ LGraphNode.prototype.computeSize = function(out) {
     );
     var size = out || new Float32Array([0, 0]);
     rows = Math.max(rows, 1);
-    var font_size = LiteGraph.NODE_TEXT_SIZE; //although it should be graphcanvas.inner_text_font size
+    var font_size = NODE_TEXT_SIZE; //although it should be graphcanvas.inner_text_font size
 
     var title_width = compute_text_size(this.title);
     var input_width = 0;
@@ -1297,12 +1258,12 @@ LGraphNode.prototype.computeSize = function(out) {
     }
 
     size[0] = Math.max(input_width + output_width + 10, title_width);
-    size[0] = Math.max(size[0], LiteGraph.NODE_WIDTH);
+    size[0] = Math.max(size[0], NODE_WIDTH);
     if (this.widgets && this.widgets.length) {
-        size[0] = Math.max(size[0], LiteGraph.NODE_WIDTH * 1.5);
+        size[0] = Math.max(size[0], NODE_WIDTH * 1.5);
     }
 
-    size[1] = (this.constructor.slot_start_y || 0) + rows * LiteGraph.NODE_SLOT_HEIGHT;
+    size[1] = (this.constructor.slot_start_y || 0) + rows * NODE_SLOT_HEIGHT;
 
     var widgets_height = 0;
     if (this.widgets && this.widgets.length) {
@@ -1310,7 +1271,7 @@ LGraphNode.prototype.computeSize = function(out) {
             if (this.widgets[i].computeSize)
                 widgets_height += this.widgets[i].computeSize(size[0])[1] + 4;
             else
-                widgets_height += LiteGraph.NODE_WIDGET_HEIGHT + 4;
+                widgets_height += NODE_WIDGET_HEIGHT + 4;
         }
         widgets_height += 8;
     }
@@ -1489,7 +1450,7 @@ LGraphNode.prototype.getBounding = function(out, compute_outer) {
     out[0] = nodePos[0] - left_offset;
     out[1] = nodePos[1] - NODE_TITLE_HEIGHT - top_offset;
     out[2] = isCollapsed ?
-        (this._collapsed_width || LiteGraph.NODE_COLLAPSED_WIDTH) + right_offset :
+        (this._collapsed_width || NODE_COLLAPSED_WIDTH) + right_offset :
         nodeSize[0] + right_offset;
     out[3] = isCollapsed ?
         NODE_TITLE_HEIGHT + bottom_offset :
@@ -1516,14 +1477,13 @@ LGraphNode.prototype.isPointInside = function(x, y, margin, skip_title) {
         margin_top = 0;
     }
     if (this.flags && this.flags.collapsed) {
-        //if ( distance([x,y], [this.pos[0] + this.size[0]*0.5, this.pos[1] + this.size[1]*0.5]) < LiteGraph.NODE_COLLAPSED_RADIUS)
         if (
             isInsideRectangle(
                 x,
                 y,
                 this.pos[0] - margin,
                 this.pos[1] - NODE_TITLE_HEIGHT - margin,
-                (this._collapsed_width || LiteGraph.NODE_COLLAPSED_WIDTH) +
+                (this._collapsed_width || NODE_COLLAPSED_WIDTH) +
                     2 * margin,
                 NODE_TITLE_HEIGHT + 2 * margin
             )
@@ -2039,7 +1999,7 @@ LGraphNode.prototype.connect = function(slot, target_node, target_slot) {
     }
     if (this.onConnectionsChange) {
         this.onConnectionsChange(
-            LiteGraph.OUTPUT,
+            IN_OUT_PUT.OUTPUT,
             slot,
             true,
             link_info,
@@ -2048,7 +2008,7 @@ LGraphNode.prototype.connect = function(slot, target_node, target_slot) {
     } //link_info has been created now, so its updated
     if (target_node.onConnectionsChange) {
         target_node.onConnectionsChange(
-            LiteGraph.INPUT,
+            IN_OUT_PUT.INPUT,
             target_slot,
             true,
             link_info,
@@ -2057,14 +2017,14 @@ LGraphNode.prototype.connect = function(slot, target_node, target_slot) {
     }
     if (this.graph && this.graph.onNodeConnectionChange) {
         this.graph.onNodeConnectionChange(
-            LiteGraph.INPUT,
+            IN_OUT_PUT.INPUT,
             target_node,
             target_slot,
             this,
             slot
         );
         this.graph.onNodeConnectionChange(
-            LiteGraph.OUTPUT,
+            IN_OUT_PUT.OUTPUT,
             this,
             slot,
             target_node,
@@ -2132,7 +2092,7 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node) {
                 }
                 if (target_node.onConnectionsChange) {
                     target_node.onConnectionsChange(
-                        LiteGraph.INPUT,
+                        IN_OUT_PUT.INPUT,
                         link_info.target_slot,
                         false,
                         link_info,
@@ -2141,7 +2101,7 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node) {
                 } //link_info hasn't been modified so its ok
                 if (this.onConnectionsChange) {
                     this.onConnectionsChange(
-                        LiteGraph.OUTPUT,
+                        IN_OUT_PUT.OUTPUT,
                         slot,
                         false,
                         link_info,
@@ -2150,19 +2110,19 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node) {
                 }
                 if (this.graph && this.graph.onNodeConnectionChange) {
                     this.graph.onNodeConnectionChange(
-                        LiteGraph.OUTPUT,
+                        IN_OUT_PUT.OUTPUT,
                         this,
                         slot
                     );
                 }
                 if (this.graph && this.graph.onNodeConnectionChange) {
                     this.graph.onNodeConnectionChange(
-                        LiteGraph.OUTPUT,
+                        IN_OUT_PUT.OUTPUT,
                         this,
                         slot
                     );
                     this.graph.onNodeConnectionChange(
-                        LiteGraph.INPUT,
+                        IN_OUT_PUT.INPUT,
                         target_node,
                         link_info.target_slot
                     );
@@ -2190,7 +2150,7 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node) {
                 input.link = null; //remove other side link
                 if (target_node.onConnectionsChange) {
                     target_node.onConnectionsChange(
-                        LiteGraph.INPUT,
+                        IN_OUT_PUT.INPUT,
                         link_info.target_slot,
                         false,
                         link_info,
@@ -2199,7 +2159,7 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node) {
                 } //link_info hasn't been modified so its ok
                 if (this.graph && this.graph.onNodeConnectionChange) {
                     this.graph.onNodeConnectionChange(
-                        LiteGraph.INPUT,
+                        IN_OUT_PUT.INPUT,
                         target_node,
                         link_info.target_slot
                     );
@@ -2208,7 +2168,7 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node) {
             delete this.graph.links[link_id]; //remove the link from the links pool
             if (this.onConnectionsChange) {
                 this.onConnectionsChange(
-                    LiteGraph.OUTPUT,
+                    IN_OUT_PUT.OUTPUT,
                     slot,
                     false,
                     link_info,
@@ -2217,12 +2177,12 @@ LGraphNode.prototype.disconnectOutput = function(slot, target_node) {
             }
             if (this.graph && this.graph.onNodeConnectionChange) {
                 this.graph.onNodeConnectionChange(
-                    LiteGraph.OUTPUT,
+                    IN_OUT_PUT.OUTPUT,
                     this,
                     slot
                 );
                 this.graph.onNodeConnectionChange(
-                    LiteGraph.INPUT,
+                    IN_OUT_PUT.INPUT,
                     target_node,
                     link_info.target_slot
                 );
@@ -2296,7 +2256,7 @@ LGraphNode.prototype.disconnectInput = function(slot) {
             }
             if (this.onConnectionsChange) {
                 this.onConnectionsChange(
-                    LiteGraph.INPUT,
+                    IN_OUT_PUT.INPUT,
                     slot,
                     false,
                     link_info,
@@ -2305,7 +2265,7 @@ LGraphNode.prototype.disconnectInput = function(slot) {
             }
             if (target_node.onConnectionsChange) {
                 target_node.onConnectionsChange(
-                    LiteGraph.OUTPUT,
+                    IN_OUT_PUT.OUTPUT,
                     i,
                     false,
                     link_info,
@@ -2314,11 +2274,11 @@ LGraphNode.prototype.disconnectInput = function(slot) {
             }
             if (this.graph && this.graph.onNodeConnectionChange) {
                 this.graph.onNodeConnectionChange(
-                    LiteGraph.OUTPUT,
+                    IN_OUT_PUT.OUTPUT,
                     target_node,
                     i
                 );
-                this.graph.onNodeConnectionChange(LiteGraph.INPUT, this, slot);
+                this.graph.onNodeConnectionChange(IN_OUT_PUT.INPUT, this, slot);
             }
         }
     } //link != null
@@ -2351,10 +2311,10 @@ LGraphNode.prototype.getConnectionPos = function(
         num_slots = this.outputs.length;
     }
 
-    var offset = LiteGraph.NODE_SLOT_HEIGHT * 0.5;
+    var offset = NODE_SLOT_HEIGHT * 0.5;
 
     if (this.flags.collapsed) {
-        var w = this._collapsed_width || LiteGraph.NODE_COLLAPSED_WIDTH;
+        var w = this._collapsed_width || NODE_COLLAPSED_WIDTH;
         if (this.horizontal) {
             out[0] = this.pos[0] + w * 0.5;
             if (is_input) {
@@ -2419,7 +2379,7 @@ LGraphNode.prototype.getConnectionPos = function(
     }
     out[1] =
         this.pos[1] +
-        (slot_number + 0.7) * LiteGraph.NODE_SLOT_HEIGHT +
+        (slot_number + 0.7) * NODE_SLOT_HEIGHT +
         (this.constructor.slot_start_y || 0);
     return out;
 };

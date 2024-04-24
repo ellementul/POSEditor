@@ -1,5 +1,9 @@
 import { LGraphNode } from './l_graph_node.js'
 
+import {
+    SHAPES
+} from './settings.js'
+
 // *************************************************************
 //   LiteGraph CLASS                                     *******
 // *************************************************************
@@ -12,21 +16,6 @@ import { LGraphNode } from './l_graph_node.js'
  */
 
 var LiteGraph = {
-    NODE_SLOT_HEIGHT: 20,
-    NODE_WIDGET_HEIGHT: 20,
-    NODE_WIDTH: 140,
-    NODE_MIN_WIDTH: 50,
-    NODE_COLLAPSED_RADIUS: 10,
-    NODE_COLLAPSED_WIDTH: 80,
-    NODE_SELECTED_TITLE_COLOR: "#FFF",
-    NODE_TEXT_SIZE: 14,
-    NODE_TEXT_COLOR: "#AAA",
-    NODE_SUBTEXT_SIZE: 12,
-    NODE_DEFAULT_COLOR: "#333",
-    NODE_DEFAULT_BGCOLOR: "#353535",
-    NODE_DEFAULT_BOXCOLOR: "#666",
-    NODE_DEFAULT_SHAPE: "box",
-    NODE_BOX_OUTLINE_COLOR: "#FFF",
     DEFAULT_SHADOW_COLOR: "rgba(0,0,0,0.5)",
     DEFAULT_GROUP_FONT: 24,
 
@@ -42,18 +31,6 @@ var LiteGraph = {
     MAX_NUMBER_OF_NODES: 1000, //avoid infinite loops
     DEFAULT_POSITION: [100, 100], //default node position
     VALID_SHAPES: ["default", "box", "round", "card"], //,"circle"
-
-    //shapes are used for nodes but also for slots
-    BOX_SHAPE: 1,
-    ROUND_SHAPE: 2,
-    CIRCLE_SHAPE: 3,
-    CARD_SHAPE: 4,
-    ARROW_SHAPE: 5,
-    GRID_SHAPE: 6, // intended for slot arrays
-
-    //enums
-    INPUT: 1,
-    OUTPUT: 2,
 
     EVENT: -1, //for outputs
     ACTION: -1, //for inputs
@@ -182,16 +159,16 @@ var LiteGraph = {
                             delete this._shape;
                             break;
                         case "box":
-                            this._shape = LiteGraph.BOX_SHAPE;
+                            this._shape = SHAPES.BOX_SHAPE;
                             break;
                         case "round":
-                            this._shape = LiteGraph.ROUND_SHAPE;
+                            this._shape = SHAPES.ROUND_SHAPE;
                             break;
                         case "circle":
-                            this._shape = LiteGraph.CIRCLE_SHAPE;
+                            this._shape = SHAPES.CIRCLE_SHAPE;
                             break;
                         case "card":
-                            this._shape = LiteGraph.CARD_SHAPE;
+                            this._shape = SHAPES.CARD_SHAPE;
                             break;
                         default:
                             this._shape = v;
