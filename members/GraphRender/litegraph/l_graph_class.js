@@ -313,12 +313,7 @@ const VERTICAL_LAYOUT = "vertical" // arrange nodes vertically
                 this.errors_in_execution = false;
             } catch (err) {
                 this.errors_in_execution = true;
-                if (LiteGraph.throw_errors) {
-                    throw err;
-                }
-                if (debug) {
-                    console.log("Error during execution: " + err);
-                }
+                throw new Error("Error during execution: " + err)
                 this.stop();
             }
         }

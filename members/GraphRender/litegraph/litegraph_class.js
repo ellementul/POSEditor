@@ -21,19 +21,27 @@ const DEFAULT_POSITION = [100, 100] //default node position
  */
 
 var LiteGraph = {
-
-    node_images_path: "",
-
-    catch_exceptions: true,
-    throw_errors: true,
-    allow_scripts: false, //if set to true some nodes like Formula would be allowed to evaluate code that comes from unsafe sources (like node configuration), which could lead to exploits
-    use_deferred_actions: true, //executes actions during the graph execution flow
     registered_node_types: {}, //nodetypes by string
     node_types_by_file_extension: {}, //used for dropping files in the canvas
     Nodes: {}, //node types by classname
     Globals: {}, //used to store vars between graphs
 
     searchbox_extras: {}, //used to add extra features to the search box
+
+    // set these values if not using auto_load_slot_types
+    registered_slot_in_types: {}, // slot types for nodeclass
+    registered_slot_out_types: {}, // slot types for nodeclass
+    slot_types_in: [], // slot types IN
+    slot_types_out: [], // slot types OUT
+    slot_types_default_in: [], // specify for each IN slot type a(/many) default node(s), use single string, array, or object (with node, title, parameters, ..) like for search
+    slot_types_default_out: [], // specify for each OUT slot type a(/many) default node(s), use single string, array, or object (with node, title, parameters, ..) like for search
+    
+
+//CONSTS
+    node_images_path: "",
+
+    use_deferred_actions: true, //executes actions during the graph execution flow
+    
     auto_sort_node_types: false, // [true!] If set to true, will automatically sort node types / categories in the context menus
     
     node_box_coloured_when_on: false, // [true!] this make the nodes box (top left circle) coloured when triggered (execute/action), visual feedback
@@ -51,21 +59,12 @@ var LiteGraph = {
     
     auto_load_slot_types: false, // [if want false, use true, run, get vars values to be statically set, than disable] nodes types and nodeclass association with node types need to be calculated, if dont want this, calculate once and set registered_slot_[in/out]_types and slot_types_[in/out]
     
-    // set these values if not using auto_load_slot_types
-    registered_slot_in_types: {}, // slot types for nodeclass
-    registered_slot_out_types: {}, // slot types for nodeclass
-    slot_types_in: [], // slot types IN
-    slot_types_out: [], // slot types OUT
-    slot_types_default_in: [], // specify for each IN slot type a(/many) default node(s), use single string, array, or object (with node, title, parameters, ..) like for search
-    slot_types_default_out: [], // specify for each OUT slot type a(/many) default node(s), use single string, array, or object (with node, title, parameters, ..) like for search
     
     alt_drag_do_clone_nodes: false, // [true!] very handy, ALT click to clone and drag the new node
 
     do_add_triggers_slots: false, // [true!] will create and connect event slots when using action/events connections, !WILL CHANGE node mode when using onTrigger (enable mode colors), onExecuted does not need this
     
     allow_multi_output_for_events: true, // [false!] being events, it is strongly reccomended to use them sequentially, one by one
-
-    middle_click_slot_add_default_node: false, //[true!] allows to create and connect a ndoe clicking with the third button (wheel)
     
     release_link_on_empty_shows_menu: false, //[true!] dragging a link to empty space will open a menu, add from list, search or defaults
 
@@ -405,15 +404,12 @@ var LiteGraph = {
 
         var node = null;
 
-        if (LiteGraph.catch_exceptions) {
-            try {
-                node = new base_class(title);
-            } catch (err) {
-                console.error(err);
-                return null;
-            }
-        } else {
+
+        try {
             node = new base_class(title);
+        } catch (err) {
+            console.error(err);
+            return null;
         }
 
         node.type = type;
@@ -550,10 +546,7 @@ var LiteGraph = {
                 docHeadObj.appendChild(dynamicScript);
                 docHeadObj.removeChild(script_files[i]);
             } catch (err) {
-                if (LiteGraph.throw_errors) {
-                    throw err;
-                }
-                console.error("Error while reloading " + src);
+                throw new Error("Error while reloading " + src, err);
             }
         }
 
