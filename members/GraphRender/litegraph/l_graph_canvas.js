@@ -38,6 +38,10 @@ const WIDGET_OUTLINE_COLOR = "#666"
 const WIDGET_TEXT_COLOR = "#DDD"
 const WIDGET_SECONDARY_TEXT_COLOR = "#999"
 
+const LINK_COLOR = "#9A9"
+const EVENT_LINK_COLOR = "#A86"
+const CONNECTING_LINK_COLOR = "#AFA"
+
 /*********************************************************************************
 // LGraphCanvas: LGraph renderer CLASS
 //*********************************************************************************
@@ -70,7 +74,7 @@ function LGraphCanvas(canvas, graph, options) {
     this.inner_text_font =
         "normal " + NODE_SUBTEXT_SIZE + "px Arial";
     this.node_title_color = NODE_TITLE_COLOR;
-    this.default_link_color = LiteGraph.LINK_COLOR;
+    this.default_link_color = LINK_COLOR;
     this.default_connection_color = {
         input_off: "#778",
         input_on: "#7F7", //"#BBD"
@@ -177,7 +181,7 @@ function LGraphCanvas(canvas, graph, options) {
 LGraphCanvas.DEFAULT_BACKGROUND_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQBJREFUeNrs1rEKwjAUhlETUkj3vP9rdmr1Ysammk2w5wdxuLgcMHyptfawuZX4pJSWZTnfnu/lnIe/jNNxHHGNn//HNbbv+4dr6V+11uF527arU7+u63qfa/bnmh8sWLBgwYJlqRf8MEptXPBXJXa37BSl3ixYsGDBMliwFLyCV/DeLIMFCxYsWLBMwSt4Be/NggXLYMGCBUvBK3iNruC9WbBgwYJlsGApeAWv4L1ZBgsWLFiwYJmCV/AK3psFC5bBggULloJX8BpdwXuzYMGCBctgwVLwCl7Be7MMFixYsGDBsu8FH1FaSmExVfAxBa/gvVmwYMGCZbBg/W4vAQYA5tRF9QYlv/QAAAAASUVORK5CYII=";
 
 LGraphCanvas.link_type_colors = {
-    "-1": LiteGraph.EVENT_LINK_COLOR,
+    "-1": EVENT_LINK_COLOR,
     number: "#AAA",
     node: "#DCA"
 };
@@ -2633,10 +2637,10 @@ LGraphCanvas.prototype.drawFrontCanvas = function() {
             
             switch (connType) {
                 case LiteGraph.EVENT:
-                    link_color = LiteGraph.EVENT_LINK_COLOR;
+                    link_color = EVENT_LINK_COLOR;
                     break;
                 default:
-                    link_color = LiteGraph.CONNECTING_LINK_COLOR;
+                    link_color = CONNECTING_LINK_COLOR;
             }
 
             //the connection being dragged by the mouse
