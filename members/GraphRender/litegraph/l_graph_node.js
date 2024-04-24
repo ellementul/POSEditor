@@ -8,7 +8,8 @@ import {
     NODE_TITLE_HEIGHT,
     NODE_SLOT_HEIGHT,
     NODE_WIDGET_HEIGHT,
-    NODE_TEXT_SIZE
+    NODE_TEXT_SIZE,
+    NODE_MODES_EXC
 } from './settings.js'
 
 /**
@@ -19,6 +20,7 @@ import {
 
 const NODE_WIDTH = 140
 const NODE_COLLAPSED_WIDTH = 80
+const DEFAULT_POSITION = [100, 100] //default node position
 
 const IN_OUT_PUT = {
     //enums
@@ -718,22 +720,22 @@ LGraphNode.prototype.onAfterExecuteNode = function(param, options){
 
 LGraphNode.prototype.changeMode = function(modeTo){
     switch(modeTo){
-        case LiteGraph.ON_EVENT:
+        case NODE_MODES_EXC.ON_EVENT:
             // this.addOnExecutedOutput();
             break;
             
-        case LiteGraph.ON_TRIGGER:
+        case NODE_MODES_EXC.ON_TRIGGER:
             this.addOnTriggerInput();
             this.addOnExecutedOutput();
             break;
             
-        case LiteGraph.NEVER:
+        case NODE_MODES_EXC.NEVER:
             break;
             
-        case LiteGraph.ALWAYS:
+        case NODE_MODES_EXC.ALWAYS:
             break;
             
-        case LiteGraph.ON_REQUEST:
+        case ON_REQUEST:
             break;
         
         default:
@@ -901,7 +903,7 @@ LGraphNode.prototype.triggerSlot = function(slot, param, link_id, options) {
         //used to mark events in graph
         var target_connection = node.inputs[link_info.target_slot];
 
-        if (node.mode === LiteGraph.ON_TRIGGER)
+        if (node.mode === NODE_MODES_EXC.ON_TRIGGER)
         {
             // generate unique trigger ID if not present
             if (!options.action_call) options.action_call = this.id+"_trigg_"+Math.floor(Math.random()*9999);
@@ -1892,7 +1894,7 @@ LGraphNode.prototype.connect = function(slot, target_node, target_slot) {
             //search for first slot with event? :: NO this is done outside
             //console.log("Connect: Creating triggerEvent");
             // force mode
-            target_node.changeMode(LiteGraph.ON_TRIGGER);
+            target_node.changeMode(NODE_MODES_EXC.ON_TRIGGER);
             target_slot = target_node.findInputSlot("onTrigger");
         }else{
             return null; // -- break --

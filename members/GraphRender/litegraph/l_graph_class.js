@@ -6,7 +6,9 @@ import { LGraphGroup } from './l_graph_group.js'
 import { LiteGraph } from './litegraph_class.js'
 import { LGraphCanvas } from './l_graph_canvas.js'
 
-import { debug, NODE_TITLE_HEIGHT } from './settings.js'
+import { debug, NODE_TITLE_HEIGHT, NODE_MODES_EXC } from './settings.js'
+
+const MAX_NUMBER_OF_NODES = 1000 //avoid infinite loops
 
 
 //*********************************************************************************
@@ -265,7 +267,7 @@ import { debug, NODE_TITLE_HEIGHT } from './settings.js'
                     var node = nodes[j];
                     if(LiteGraph.use_deferred_actions && node._waiting_actions && node._waiting_actions.length)
                         node.executePendingActions();
-                    if (node.mode == LiteGraph.ALWAYS && node.onExecute) {
+                    if (node.mode == NODE_MODES_EXC.ALWAYS && node.onExecute) {
                         //wrap node.onExecute();
                         node.doExecute();
                     }
@@ -288,7 +290,7 @@ import { debug, NODE_TITLE_HEIGHT } from './settings.js'
                         var node = nodes[j];
                         if(LiteGraph.use_deferred_actions && node._waiting_actions && node._waiting_actions.length)
                             node.executePendingActions();
-                        if (node.mode == LiteGraph.ALWAYS && node.onExecute) {
+                        if (node.mode == NODE_MODES_EXC.ALWAYS && node.onExecute) {
                             node.onExecute();
                         }
                     }
@@ -602,7 +604,7 @@ import { debug, NODE_TITLE_HEIGHT } from './settings.js'
      * @param {Array} params parameters in array format
      */
     LGraph.prototype.sendEventToAllNodes = function(eventname, params, mode) {
-        mode = mode || LiteGraph.ALWAYS;
+        mode = mode || NODE_MODES_EXC.ALWAYS;
 
         var nodes = this._nodes_in_order ? this._nodes_in_order : this._nodes;
         if (!nodes) {
@@ -682,7 +684,7 @@ import { debug, NODE_TITLE_HEIGHT } from './settings.js'
             }
         }
 
-        if (this._nodes.length >= LiteGraph.MAX_NUMBER_OF_NODES) {
+        if (this._nodes.length >= MAX_NUMBER_OF_NODES) {
             throw "LiteGraph: max number of nodes in a graph reached";
         }
 

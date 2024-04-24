@@ -19,3 +19,10 @@ export const SHAPES = {
     ARROW_SHAPE: 5,
     GRID_SHAPE: 6, // intended for slot arrays
 }
+
+export const NODE_MODES_EXC = {
+    ALWAYS: 0,
+    ON_EVENT: 1,
+    NEVER: 2,
+    ON_TRIGGER: 3
+} 

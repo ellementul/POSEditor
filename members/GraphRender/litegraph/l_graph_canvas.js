@@ -30,6 +30,9 @@ const NODE_DEFAULT_BGCOLOR = "#353535"
 const NODE_DEFAULT_BOXCOLOR = "#666"
 const NODE_BOX_OUTLINE_COLOR = "#FFF"
 
+const NODE_MODES = ["Always", "On Event", "Never", "On Trigger"] // helper, will add "On Request" and more in the future
+const NODE_MODES_COLORS = ["#666","#422","#333","#224","#626"] // use with node_box_coloured_by_mode
+
 const DEFAULT_SHADOW_COLOR = "rgba(0,0,0,0.5)"
 const DEFAULT_GROUP_FONT_SIZE = 24
 
@@ -41,6 +44,8 @@ const WIDGET_SECONDARY_TEXT_COLOR = "#999"
 const LINK_COLOR = "#9A9"
 const EVENT_LINK_COLOR = "#A86"
 const CONNECTING_LINK_COLOR = "#AFA"
+
+const VALID_SHAPES = ["default", "box", "round", "card"] //,"circle"
 
 /*********************************************************************************
 // LGraphCanvas: LGraph renderer CLASS
@@ -3829,8 +3834,8 @@ LGraphCanvas.prototype.drawNodeShape = function(
 
         var colState = false;
         if (LiteGraph.node_box_coloured_by_mode){
-            if(LiteGraph.NODE_MODES_COLORS[node.mode]){
-                colState = LiteGraph.NODE_MODES_COLORS[node.mode];
+            if(NODE_MODES_COLORS[node.mode]){
+                colState = NODE_MODES_COLORS[node.mode];
             }
         }
         if (LiteGraph.node_box_coloured_when_on){
@@ -7279,8 +7284,8 @@ LGraphCanvas.prototype.showShowNodePanel = function( node )
                                 node.title = value;
                                 break;
                             case "Mode":
-                                var kV = Object.values(LiteGraph.NODE_MODES).indexOf(value);
-                                if (kV>=0 && LiteGraph.NODE_MODES[kV]){
+                                var kV = Object.values(NODE_MODES).indexOf(value);
+                                if (kV>=0 && NODE_MODES[kV]){
                                     node.changeMode(kV);
                                 }else{
                                     console.warn("unexpected mode: "+value);
@@ -7304,7 +7309,7 @@ LGraphCanvas.prototype.showShowNodePanel = function( node )
         
         panel.addWidget( "string", "Title", node.title, {}, fUpdate);
         
-        panel.addWidget( "combo", "Mode", LiteGraph.NODE_MODES[node.mode], {values: LiteGraph.NODE_MODES}, fUpdate);
+        panel.addWidget( "combo", "Mode", NODE_MODES[node.mode], {values: NODE_MODES}, fUpdate);
         
         var nodeCol = "";
         if (node.color !== undefined){
@@ -7548,39 +7553,6 @@ LGraphCanvas.onMenuNodePin = function(value, options, e, menu, node) {
     node.pin();
 };
 
-LGraphCanvas.onMenuNodeMode = function(value, options, e, menu, node) {
-    new ContextMenu(
-        LiteGraph.NODE_MODES,
-        { event: e, callback: inner_clicked, parentMenu: menu, node: node }
-    );
-
-    function inner_clicked(v) {
-        if (!node) {
-            return;
-        }
-        var kV = Object.values(LiteGraph.NODE_MODES).indexOf(v);
-        var fApplyMultiNode = function(node){
-            if (kV>=0 && LiteGraph.NODE_MODES[kV])
-                node.changeMode(kV);
-            else{
-                console.warn("unexpected mode: "+v);
-                node.changeMode(LiteGraph.ALWAYS);
-            }
-        }
-        
-        var graphcanvas = LGraphCanvas.active_canvas;
-        if (!graphcanvas.selected_nodes || Object.keys(graphcanvas.selected_nodes).length <= 1){
-            fApplyMultiNode(node);
-        }else{
-            for (var i in graphcanvas.selected_nodes) {
-                fApplyMultiNode(graphcanvas.selected_nodes[i]);
-            }
-        }
-    }
-
-    return false;
-};
-
 LGraphCanvas.onMenuNodeColors = function(value, options, e, menu, node) {
     if (!node) {
         throw "no node for color";
@@ -7655,7 +7627,7 @@ LGraphCanvas.onMenuNodeShapes = function(value, options, e, menu, node) {
         throw "no node passed";
     }
 
-    new ContextMenu(LiteGraph.VALID_SHAPES, {
+    new ContextMenu(VALID_SHAPES, {
         event: e,
         callback: inner_clicked,
         parentMenu: menu,
@@ -7850,11 +7822,6 @@ LGraphCanvas.prototype.getNodeMenuOptions = function(node) {
             {
                 content: "Title",
                 callback: LGraphCanvas.onShowPropertyEditor
-            },
-            {
-                content: "Mode",
-                has_submenu: true,
-                callback: LGraphCanvas.onMenuNodeMode
             }];
         if(node.resizable !== false){
             options.push({

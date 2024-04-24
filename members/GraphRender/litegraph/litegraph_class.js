@@ -1,8 +1,11 @@
 import { LGraphNode } from './l_graph_node.js'
 
 import {
-    SHAPES
+    SHAPES,
+    NODE_MODES_EXC
 } from './settings.js'
+
+const DEFAULT_POSITION = [100, 100] //default node position
 
 // *************************************************************
 //   LiteGraph CLASS                                     *******
@@ -16,19 +19,9 @@ import {
  */
 
 var LiteGraph = {
-    MAX_NUMBER_OF_NODES: 1000, //avoid infinite loops
-    DEFAULT_POSITION: [100, 100], //default node position
-    VALID_SHAPES: ["default", "box", "round", "card"], //,"circle"
 
     EVENT: -1, //for outputs
     ACTION: -1, //for inputs
-
-    NODE_MODES: ["Always", "On Event", "Never", "On Trigger"], // helper, will add "On Request" and more in the future
-    NODE_MODES_COLORS:["#666","#422","#333","#224","#626"], // use with node_box_coloured_by_mode
-    ALWAYS: 0,
-    ON_EVENT: 1,
-    NEVER: 2,
-    ON_TRIGGER: 3,
 
     UP: 1,
     DOWN: 2,
@@ -472,10 +465,10 @@ var LiteGraph = {
             //call onresize?
         }
         if (!node.pos) {
-            node.pos = LiteGraph.DEFAULT_POSITION.concat();
+            node.pos = DEFAULT_POSITION.concat();
         }
         if (!node.mode) {
-            node.mode = LiteGraph.ALWAYS;
+            node.mode = NODE_MODES_EXC.ALWAYS;
         }
 
         //extra options
