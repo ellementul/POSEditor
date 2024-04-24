@@ -30,6 +30,14 @@ const NODE_DEFAULT_BGCOLOR = "#353535"
 const NODE_DEFAULT_BOXCOLOR = "#666"
 const NODE_BOX_OUTLINE_COLOR = "#FFF"
 
+const DEFAULT_SHADOW_COLOR = "rgba(0,0,0,0.5)"
+const DEFAULT_GROUP_FONT_SIZE = 24
+
+const WIDGET_BGCOLOR = "#222"
+const WIDGET_OUTLINE_COLOR = "#666"
+const WIDGET_TEXT_COLOR = "#DDD"
+const WIDGET_SECONDARY_TEXT_COLOR = "#999"
+
 /*********************************************************************************
 // LGraphCanvas: LGraph renderer CLASS
 //*********************************************************************************
@@ -3229,7 +3237,7 @@ LGraphCanvas.prototype.drawNode = function(node, ctx) {
     ctx.globalAlpha = editor_alpha;
 
     if (this.render_shadows && !low_quality) {
-        ctx.shadowColor = LiteGraph.DEFAULT_SHADOW_COLOR;
+        ctx.shadowColor = DEFAULT_SHADOW_COLOR;
         ctx.shadowOffsetX = 2 * this.ds.scale;
         ctx.shadowOffsetY = 2 * this.ds.scale;
         ctx.shadowBlur = 3 * this.ds.scale;
@@ -3782,7 +3790,7 @@ LGraphCanvas.prototype.drawNodeShape = function(
             var title_color = node.constructor.title_color || fgcolor;
 
             if (node.flags.collapsed) {
-                ctx.shadowColor = LiteGraph.DEFAULT_SHADOW_COLOR;
+                ctx.shadowColor = DEFAULT_SHADOW_COLOR;
             }
 
             //* gradient test
@@ -4540,10 +4548,10 @@ LGraphCanvas.prototype.drawNodeWidgets = function(
     var show_text = this.ds.scale > 0.5;
     ctx.save();
     ctx.globalAlpha = this.editor_alpha;
-    var outline_color = LiteGraph.WIDGET_OUTLINE_COLOR;
-    var background_color = LiteGraph.WIDGET_BGCOLOR;
-    var text_color = LiteGraph.WIDGET_TEXT_COLOR;
-    var secondary_text_color = LiteGraph.WIDGET_SECONDARY_TEXT_COLOR;
+    var outline_color = WIDGET_OUTLINE_COLOR;
+    var background_color = WIDGET_BGCOLOR;
+    var text_color = WIDGET_TEXT_COLOR;
+    var secondary_text_color = WIDGET_SECONDARY_TEXT_COLOR;
     var margin = 15;
 
     for (var i = 0; i < widgets.length; ++i) {
@@ -4991,7 +4999,7 @@ LGraphCanvas.prototype.drawGroups = function(canvas, ctx) {
         ctx.fill();
 
         var font_size =
-            group.font_size || LiteGraph.DEFAULT_GROUP_FONT_SIZE;
+            group.font_size || DEFAULT_GROUP_FONT_SIZE;
         ctx.font = font_size + "px Arial";
         ctx.textAlign = "left";
         ctx.fillText(group.title, pos[0] + 4, pos[1] + font_size);

@@ -16,13 +16,6 @@ import {
  */
 
 var LiteGraph = {
-    DEFAULT_SHADOW_COLOR: "rgba(0,0,0,0.5)",
-    DEFAULT_GROUP_FONT: 24,
-
-    WIDGET_BGCOLOR: "#222",
-    WIDGET_OUTLINE_COLOR: "#666",
-    WIDGET_TEXT_COLOR: "#DDD",
-    WIDGET_SECONDARY_TEXT_COLOR: "#999",
 
     LINK_COLOR: "#9A9",
     EVENT_LINK_COLOR: "#A86",
