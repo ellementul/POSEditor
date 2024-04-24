@@ -6,7 +6,7 @@ import { LGraphGroup } from './l_graph_group.js'
 import { LiteGraph } from './litegraph_class.js'
 import { LGraphCanvas } from './l_graph_canvas.js'
 
-import { debug } from './settings.js'
+import { debug, NODE_TITLE_HEIGHT } from './settings.js'
 
 
 //*********************************************************************************
@@ -547,7 +547,7 @@ import { debug } from './settings.js'
                 continue;
             }
             let max_size = 100;
-            let y = margin + LiteGraph.NODE_TITLE_HEIGHT;
+            let y = margin + NODE_TITLE_HEIGHT;
             for (let j = 0; j < column.length; ++j) {
                 const node = column[j];
                 node.pos[0] = (layout == LiteGraph.VERTICAL_LAYOUT) ? y : x;
@@ -557,7 +557,7 @@ import { debug } from './settings.js'
                     max_size = node.size[max_size_index];
                 }
                 const node_size_index = (layout == LiteGraph.VERTICAL_LAYOUT) ? 0 : 1;
-                y += node.size[node_size_index] + margin + LiteGraph.NODE_TITLE_HEIGHT;
+                y += node.size[node_size_index] + margin + NODE_TITLE_HEIGHT;
             }
             x += max_size + margin;
         }
@@ -1406,8 +1406,7 @@ import { debug } from './settings.js'
             links: links,
             groups: groups_info,
             config: this.config,
-            extra: this.extra,
-            version: LiteGraph.VERSION
+            extra: this.extra
         };
 
         if(this.onSerialize)

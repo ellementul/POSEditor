@@ -12,6 +12,11 @@ import { ContextMenu } from './context_menu.js'
 import { node_colors } from'./node_colors.js'
 import { DragAndScale } from './drag_and_scale.js'
 
+import { NODE_TITLE_HEIGHT } from './settings.js'
+
+const NODE_TITLE_TEXT_Y = 20
+const NODE_TITLE_COLOR = "#999"
+
 /*********************************************************************************
 // LGraphCanvas: LGraph renderer CLASS
 //*********************************************************************************
@@ -24,7 +29,7 @@ import { DragAndScale } from './drag_and_scale.js'
  * @constructor
  * @param {HTMLCanvas} canvas the canvas where you want to render (it accepts a selector in string format or the canvas element itself)
  * @param {LGraph} graph [optional]
- * @param {Object} options [optional] { skip_rendering, autoresize, viewport }
+ * @param {Object} options [optional] { skip_rendering, viewport }
  */
 function LGraphCanvas(canvas, graph, options) {
     this.options = options = options || {};
@@ -43,7 +48,7 @@ function LGraphCanvas(canvas, graph, options) {
     this.title_text_font = "" + LiteGraph.NODE_TEXT_SIZE + "px Arial";
     this.inner_text_font =
         "normal " + LiteGraph.NODE_SUBTEXT_SIZE + "px Arial";
-    this.node_title_color = LiteGraph.NODE_TITLE_COLOR;
+    this.node_title_color = NODE_TITLE_COLOR;
     this.default_link_color = LiteGraph.LINK_COLOR;
     this.default_connection_color = {
         input_off: "#778",
@@ -144,8 +149,6 @@ function LGraphCanvas(canvas, graph, options) {
     if (!options.skip_render) {
         this.startRendering();
     }
-
-    this.autoresize = options.autoresize;
 }
 
 
@@ -317,8 +320,6 @@ LGraphCanvas.prototype.getCurrentGraph = function() {
  * @param {Canvas} assigns a canvas (also accepts the ID of the element (not a selector)
  */
 LGraphCanvas.prototype.setCanvas = function(canvas, skip_events) {
-    var that = this;
-
     if (canvas) {
         if (canvas.constructor === String) {
             canvas = document.getElementById(canvas);
@@ -377,13 +378,12 @@ LGraphCanvas.prototype.setCanvas = function(canvas, skip_events) {
         this.enableWebGL();
     }
 
-    //input:  (move and up could be unbinded)
-    // why here? this._mousemove_callback = this.processMouseMove.bind(this);
-    // why here? this._mouseup_callback = this.processMouseUp.bind(this);
-
     if (!skip_events) {
         this.bindEvents();
     }
+
+    const ref_window = this.getCanvasWindow();
+    this.resize(ref_window.innerWidth, ref_window.innerHeight)
 };
 
 //used in some events to capture them
@@ -419,9 +419,8 @@ LGraphCanvas.prototype.bindEvents = function() {
     // why mousemove and mouseup were not binded here?
     this._mousemove_callback = this.processMouseMove.bind(this);
     this._mouseup_callback = this.processMouseUp.bind(this);
-    
-    //touch events -- TODO IMPLEMENT
-    //this._touch_callback = this.touchHandler.bind(this);
+
+    this._resize_callback = () => this.resize(ref_window.innerWidth, ref_window.innerHeight)
 
     pointerListenerAdd(canvas,"down", this._mousedown_callback, true); //down do not need to store the binded
     canvas.addEventListener("mousewheel", this._mousewheel_callback, false);
@@ -436,15 +435,6 @@ LGraphCanvas.prototype.bindEvents = function() {
         false
     );
 
-    //touch events -- THIS WAY DOES NOT WORK, finish implementing pointerevents, than clean the touchevents
-    /*if( 'touchstart' in document.documentElement )
-    {
-        canvas.addEventListener("touchstart", this._touch_callback, true);
-        canvas.addEventListener("touchmove", this._touch_callback, true);
-        canvas.addEventListener("touchend", this._touch_callback, true);
-        canvas.addEventListener("touchcancel", this._touch_callback, true);
-    }*/
-
     //Keyboard ******************
     this._key_callback = this.processKey.bind(this);
     canvas.setAttribute("tabindex",1); //otherwise key events are ignored
@@ -458,6 +448,8 @@ LGraphCanvas.prototype.bindEvents = function() {
     canvas.addEventListener("dragend", this._doNothing, false);
     canvas.addEventListener("drop", this._ondrop_callback, false);
     canvas.addEventListener("dragenter", this._doReturnTrue, false);
+
+    ref_window.addEventListener("resize", this._resize_callback)
 
     this._events_binded = true;
 };
@@ -494,11 +486,7 @@ LGraphCanvas.prototype.unbindEvents = function() {
     this.canvas.removeEventListener("drop", this._ondrop_callback);
     this.canvas.removeEventListener("dragenter", this._doReturnTrue);
 
-    //touch events -- THIS WAY DOES NOT WORK, finish implementing pointerevents, than clean the touchevents
-    /*this.canvas.removeEventListener("touchstart", this._touch_callback );
-    this.canvas.removeEventListener("touchmove", this._touch_callback );
-    this.canvas.removeEventListener("touchend", this._touch_callback );
-    this.canvas.removeEventListener("touchcancel", this._touch_callback );*/
+    ref_window.removeEventListener("resize", this._resize_callback)
 
     this._mousedown_callback = null;
     this._mousewheel_callback = null;
@@ -609,13 +597,6 @@ LGraphCanvas.prototype.startRendering = function() {
  */
 LGraphCanvas.prototype.stopRendering = function() {
     this.is_rendering = false;
-    /*
-if(this.rendering_timer_id)
-{
-    clearInterval(this.rendering_timer_id);
-    this.rendering_timer_id = null;
-}
-*/
 };
 
 /* LiteGraphCanvas input */
@@ -908,7 +889,7 @@ LGraphCanvas.prototype.processMouseDown = function(e) {
                     //open subgraph button
                     if(node.subgraph && !node.skip_subgraph_button)
                     {
-                        if ( !node.flags.collapsed && pos[0] > node.size[0] - LiteGraph.NODE_TITLE_HEIGHT && pos[1] < 0 ) {
+                        if ( !node.flags.collapsed && pos[0] > node.size[0] - NODE_TITLE_HEIGHT && pos[1] < 0 ) {
                             var that = this;
                             setTimeout(function() {
                                 that.openSubgraph(node.subgraph);
@@ -1125,9 +1106,6 @@ if( (this.dirty_canvas || this.dirty_bgcanvas) && this.rendering_timer_id == nul
  * @method processMouseMove
  **/
 LGraphCanvas.prototype.processMouseMove = function(e) {
-    if (this.autoresize) {
-        this.resize();
-    }
 
     if( this.set_canvas_dirty_on_mouse_event )
         this.dirty_canvas = true;
@@ -1613,7 +1591,7 @@ LGraphCanvas.prototype.processMouseUp = function(e) {
             if (
                 node &&
                 e.click_time < 300 &&
-                isInsideRectangle( e.canvasX, e.canvasY, node.pos[0], node.pos[1] - LiteGraph.NODE_TITLE_HEIGHT, LiteGraph.NODE_TITLE_HEIGHT, LiteGraph.NODE_TITLE_HEIGHT )
+                isInsideRectangle( e.canvasX, e.canvasY, node.pos[0], node.pos[1] - NODE_TITLE_HEIGHT, NODE_TITLE_HEIGHT, NODE_TITLE_HEIGHT )
             ) {
                 node.collapse();
             }
@@ -1716,7 +1694,6 @@ LGraphCanvas.prototype.processMouseWheel = function(e) {
         scale *= 1 / 1.1;
     }
 
-    //this.setZoom( scale, [ e.clientX, e.clientY ] );
     this.ds.changeScale(scale, [e.clientX, e.clientY]);
 
     this.graph.change();
@@ -1730,7 +1707,7 @@ LGraphCanvas.prototype.processMouseWheel = function(e) {
  * @method isOverNodeBox
  **/
 LGraphCanvas.prototype.isOverNodeBox = function(node, canvasx, canvasy) {
-    var title_height = LiteGraph.NODE_TITLE_HEIGHT;
+    var title_height = NODE_TITLE_HEIGHT;
     if (
         isInsideRectangle(
             canvasx,
@@ -2396,36 +2373,6 @@ var clientX_rel = 0;
     e.canvasY = clientY_rel / this.ds.scale - this.ds.offset[1];
     
     //console.log("pointerevents: adjustMouseEvent "+e.clientX+":"+e.clientY+" "+clientX_rel+":"+clientY_rel+" "+e.canvasX+":"+e.canvasY);
-};
-
-/**
- * changes the zoom level of the graph (default is 1), you can pass also a place used to pivot the zoom
- * @method setZoom
- **/
-LGraphCanvas.prototype.setZoom = function(value, zooming_center) {
-    this.ds.changeScale(value, zooming_center);
-    /*
-if(!zooming_center && this.canvas)
-    zooming_center = [this.canvas.width * 0.5,this.canvas.height * 0.5];
-
-var center = this.convertOffsetToCanvas( zooming_center );
-
-this.ds.scale = value;
-
-if(this.scale > this.max_zoom)
-    this.scale = this.max_zoom;
-else if(this.scale < this.min_zoom)
-    this.scale = this.min_zoom;
-
-var new_center = this.convertOffsetToCanvas( zooming_center );
-var delta_offset = [new_center[0] - center[0], new_center[1] - center[1]];
-
-this.offset[0] += delta_offset[0];
-this.offset[1] += delta_offset[1];
-*/
-
-    this.dirty_canvas = true;
-    this.dirty_bgcanvas = true;
 };
 
 /**
@@ -3299,7 +3246,7 @@ LGraphCanvas.prototype.drawNode = function(node, ctx) {
             node._collapsed_width = Math.min(
                 node.size[0],
                 ctx.measureText(title).width +
-                    LiteGraph.NODE_TITLE_HEIGHT * 2
+                    NODE_TITLE_HEIGHT * 2
             ); //LiteGraph.NODE_COLLAPSED_WIDTH;
             size[0] = node._collapsed_width;
             size[1] = 0;
@@ -3612,10 +3559,10 @@ LGraphCanvas.prototype.drawNode = function(node, ctx) {
 
         if (input_slot) {
             var x = 0;
-            var y = LiteGraph.NODE_TITLE_HEIGHT * -0.5; //center
+            var y = NODE_TITLE_HEIGHT * -0.5; //center
             if (horizontal) {
                 x = node._collapsed_width * 0.5;
-                y = -LiteGraph.NODE_TITLE_HEIGHT;
+                y = -NODE_TITLE_HEIGHT;
             }
             ctx.fillStyle = "#686";
             ctx.beginPath();
@@ -3637,7 +3584,7 @@ LGraphCanvas.prototype.drawNode = function(node, ctx) {
 
         if (output_slot) {
             var x = node._collapsed_width;
-            var y = LiteGraph.NODE_TITLE_HEIGHT * -0.5; //center
+            var y = NODE_TITLE_HEIGHT * -0.5; //center
             if (horizontal) {
                 x = node._collapsed_width * 0.5;
                 y = 0;
@@ -3744,7 +3691,7 @@ LGraphCanvas.prototype.drawNodeShape = function(
     ctx.strokeStyle = fgcolor;
     ctx.fillStyle = bgcolor;
 
-    var title_height = LiteGraph.NODE_TITLE_HEIGHT;
+    var title_height = NODE_TITLE_HEIGHT;
     var low_quality = this.ds.scale < 0.5;
 
     //render node area depending on shape
@@ -3950,7 +3897,7 @@ LGraphCanvas.prototype.drawNodeShape = function(
                     ctx.fillText(
                         title.substr(0,20), //avoid urls too long
                         title_height,// + measure.width * 0.5,
-                        LiteGraph.NODE_TITLE_TEXT_Y - title_height
+                        NODE_TITLE_TEXT_Y - title_height
                     );
                     ctx.textAlign = "left";
                 } else {
@@ -3958,7 +3905,7 @@ LGraphCanvas.prototype.drawNodeShape = function(
                     ctx.fillText(
                         title,
                         title_height,
-                        LiteGraph.NODE_TITLE_TEXT_Y - title_height
+                        NODE_TITLE_TEXT_Y - title_height
                     );
                 }
             }
@@ -3966,7 +3913,7 @@ LGraphCanvas.prototype.drawNodeShape = function(
 
         //subgraph box
         if (!node.flags.collapsed && node.subgraph && !node.skip_subgraph_button) {
-            var w = LiteGraph.NODE_TITLE_HEIGHT;
+            var w = NODE_TITLE_HEIGHT;
             var x = node.size[0] - w;
             var over = isInsideRectangle( this.graph_mouse[0] - node.pos[0], this.graph_mouse[1] - node.pos[1], x+2, -w+2, w-4, w-4 );
             ctx.fillStyle = over ? "#888" : "#555";
@@ -4537,23 +4484,23 @@ LGraphCanvas.prototype.drawExecutionOrder = function(ctx) {
         var node = visible_nodes[i];
         ctx.fillStyle = "black";
         ctx.fillRect(
-            node.pos[0] - LiteGraph.NODE_TITLE_HEIGHT,
-            node.pos[1] - LiteGraph.NODE_TITLE_HEIGHT,
-            LiteGraph.NODE_TITLE_HEIGHT,
-            LiteGraph.NODE_TITLE_HEIGHT
+            node.pos[0] - NODE_TITLE_HEIGHT,
+            node.pos[1] - NODE_TITLE_HEIGHT,
+            NODE_TITLE_HEIGHT,
+            NODE_TITLE_HEIGHT
         );
         if (node.order == 0) {
             ctx.strokeRect(
-                node.pos[0] - LiteGraph.NODE_TITLE_HEIGHT + 0.5,
-                node.pos[1] - LiteGraph.NODE_TITLE_HEIGHT + 0.5,
-                LiteGraph.NODE_TITLE_HEIGHT,
-                LiteGraph.NODE_TITLE_HEIGHT
+                node.pos[0] - NODE_TITLE_HEIGHT + 0.5,
+                node.pos[1] - NODE_TITLE_HEIGHT + 0.5,
+                NODE_TITLE_HEIGHT,
+                NODE_TITLE_HEIGHT
             );
         }
         ctx.fillStyle = "#FFF";
         ctx.fillText(
             node.order,
-            node.pos[0] + LiteGraph.NODE_TITLE_HEIGHT * -0.5,
+            node.pos[0] + NODE_TITLE_HEIGHT * -0.5,
             node.pos[1] - 6
         );
     }
@@ -5111,63 +5058,6 @@ LGraphCanvas.prototype.switchLiveMode = function(transition) {
 LGraphCanvas.prototype.onNodeSelectionChange = function(node) {
     return; //disabled
 };
-
-/* this is an implementation for touch not in production and not ready
-    */
-/*LGraphCanvas.prototype.touchHandler = function(event) {
-    //alert("foo");
-    var touches = event.changedTouches,
-        first = touches[0],
-        type = "";
-
-    switch (event.type) {
-        case "touchstart":
-            type = "mousedown";
-            break;
-        case "touchmove":
-            type = "mousemove";
-            break;
-        case "touchend":
-            type = "mouseup";
-            break;
-        default:
-            return;
-    }
-
-    //initMouseEvent(type, canBubble, cancelable, view, clickCount,
-    //           screenX, screenY, clientX, clientY, ctrlKey,
-    //           altKey, shiftKey, metaKey, button, relatedTarget);
-
-    // this is eventually a Dom object, get the LGraphCanvas back
-    if(typeof this.getCanvasWindow == "undefined"){
-        var window = this.lgraphcanvas.getCanvasWindow();
-    }else{
-        var window = this.getCanvasWindow();
-    }
-    
-    var document = window.document;
-
-    var simulatedEvent = document.createEvent("MouseEvent");
-    simulatedEvent.initMouseEvent(
-        type,
-        true,
-        true,
-        window,
-        1,
-        first.screenX,
-        first.screenY,
-        first.clientX,
-        first.clientY,
-        false,
-        false,
-        false,
-        false,
-        0, //left
-        null
-    );
-    first.target.dispatchEvent(simulatedEvent);
-    event.preventDefault();
-};*/
 
 /* CONTEXT MENU ********************/
 

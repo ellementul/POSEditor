@@ -39,3 +39,5 @@ LLink.prototype.serialize = function() {
         this.type
     ];
 };
+
+export { LLink }

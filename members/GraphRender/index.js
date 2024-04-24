@@ -1,5 +1,5 @@
 import { Member, events } from '@ellementul/united-events-environment'
-import { LGraph, LiteGraph, LGraphCanvas } from './litegraph.core.js'
+import { LGraph, LiteGraph, LGraphCanvas } from './litegraph/index.js'
 
 class GraphRenderMember extends Member {
     constructor() {
@@ -11,7 +11,6 @@ class GraphRenderMember extends Member {
         document.body.appendChild(canvas)
 
         const gCanvas = new LGraphCanvas(canvas, this.graph)
-        console.log(gCanvas.ds)
 
         this.onEvent(events.buildEvent, () => this.createCanvas()) // Subscribing on event
         

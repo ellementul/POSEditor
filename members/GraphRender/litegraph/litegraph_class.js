@@ -12,19 +12,12 @@ import { LGraphNode } from './l_graph_node.js'
  */
 
 var LiteGraph = {
-    VERSION: 0.4,
-
-    CANVAS_GRID_SIZE: 10,
-
-    NODE_TITLE_HEIGHT: 30,
-    NODE_TITLE_TEXT_Y: 20,
     NODE_SLOT_HEIGHT: 20,
     NODE_WIDGET_HEIGHT: 20,
     NODE_WIDTH: 140,
     NODE_MIN_WIDTH: 50,
     NODE_COLLAPSED_RADIUS: 10,
     NODE_COLLAPSED_WIDTH: 80,
-    NODE_TITLE_COLOR: "#999",
     NODE_SELECTED_TITLE_COLOR: "#FFF",
     NODE_TEXT_SIZE: 14,
     NODE_TEXT_COLOR: "#AAA",

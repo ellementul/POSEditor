@@ -2,6 +2,8 @@ import { getTime, uuidv4, cloneObject } from './libs.js'
 
 import { LiteGraph } from './litegraph_class.js'
 import { LLink } from './l_link.js'
+
+import { CANVAS_GRID_SIZE, NODE_TITLE_HEIGHT } from './settings.js'
 // *************************************************************
 //   Node CLASS                                          *******
 // *************************************************************
@@ -1485,13 +1487,13 @@ LGraphNode.prototype.getBounding = function(out, compute_outer) {
     }
     
     out[0] = nodePos[0] - left_offset;
-    out[1] = nodePos[1] - LiteGraph.NODE_TITLE_HEIGHT - top_offset;
+    out[1] = nodePos[1] - NODE_TITLE_HEIGHT - top_offset;
     out[2] = isCollapsed ?
         (this._collapsed_width || LiteGraph.NODE_COLLAPSED_WIDTH) + right_offset :
         nodeSize[0] + right_offset;
     out[3] = isCollapsed ?
-        LiteGraph.NODE_TITLE_HEIGHT + bottom_offset :
-        nodeSize[1] + LiteGraph.NODE_TITLE_HEIGHT + bottom_offset;
+        NODE_TITLE_HEIGHT + bottom_offset :
+        nodeSize[1] + NODE_TITLE_HEIGHT + bottom_offset;
 
     if (this.onBounding) {
         this.onBounding(out);
@@ -1509,7 +1511,7 @@ LGraphNode.prototype.getBounding = function(out, compute_outer) {
 LGraphNode.prototype.isPointInside = function(x, y, margin, skip_title) {
     margin = margin || 0;
 
-    var margin_top = this.graph && this.graph.isLive() ? 0 : LiteGraph.NODE_TITLE_HEIGHT;
+    var margin_top = this.graph && this.graph.isLive() ? 0 : NODE_TITLE_HEIGHT;
     if (skip_title) {
         margin_top = 0;
     }
@@ -1520,10 +1522,10 @@ LGraphNode.prototype.isPointInside = function(x, y, margin, skip_title) {
                 x,
                 y,
                 this.pos[0] - margin,
-                this.pos[1] - LiteGraph.NODE_TITLE_HEIGHT - margin,
+                this.pos[1] - NODE_TITLE_HEIGHT - margin,
                 (this._collapsed_width || LiteGraph.NODE_COLLAPSED_WIDTH) +
                     2 * margin,
-                LiteGraph.NODE_TITLE_HEIGHT + 2 * margin
+                NODE_TITLE_HEIGHT + 2 * margin
             )
         ) {
             return true;
@@ -2356,7 +2358,7 @@ LGraphNode.prototype.getConnectionPos = function(
         if (this.horizontal) {
             out[0] = this.pos[0] + w * 0.5;
             if (is_input) {
-                out[1] = this.pos[1] - LiteGraph.NODE_TITLE_HEIGHT;
+                out[1] = this.pos[1] - NODE_TITLE_HEIGHT;
             } else {
                 out[1] = this.pos[1];
             }
@@ -2366,15 +2368,15 @@ LGraphNode.prototype.getConnectionPos = function(
             } else {
                 out[0] = this.pos[0] + w;
             }
-            out[1] = this.pos[1] - LiteGraph.NODE_TITLE_HEIGHT * 0.5;
+            out[1] = this.pos[1] - NODE_TITLE_HEIGHT * 0.5;
         }
         return out;
     }
 
     //weird feature that never got finished
     if (is_input && slot_number == -1) {
-        out[0] = this.pos[0] + LiteGraph.NODE_TITLE_HEIGHT * 0.5;
-        out[1] = this.pos[1] + LiteGraph.NODE_TITLE_HEIGHT * 0.5;
+        out[0] = this.pos[0] + NODE_TITLE_HEIGHT * 0.5;
+        out[1] = this.pos[1] + NODE_TITLE_HEIGHT * 0.5;
         return out;
     }
 
@@ -2402,7 +2404,7 @@ LGraphNode.prototype.getConnectionPos = function(
         out[0] =
             this.pos[0] + (slot_number + 0.5) * (this.size[0] / num_slots);
         if (is_input) {
-            out[1] = this.pos[1] - LiteGraph.NODE_TITLE_HEIGHT;
+            out[1] = this.pos[1] - NODE_TITLE_HEIGHT;
         } else {
             out[1] = this.pos[1] + this.size[1];
         }
@@ -2425,11 +2427,11 @@ LGraphNode.prototype.getConnectionPos = function(
 /* Force align to grid */
 LGraphNode.prototype.alignToGrid = function() {
     this.pos[0] =
-        LiteGraph.CANVAS_GRID_SIZE *
-        Math.round(this.pos[0] / LiteGraph.CANVAS_GRID_SIZE);
+        CANVAS_GRID_SIZE *
+        Math.round(this.pos[0] / LiteGraph.CANVAS_GRID_SIZE)
     this.pos[1] =
-        LiteGraph.CANVAS_GRID_SIZE *
-        Math.round(this.pos[1] / LiteGraph.CANVAS_GRID_SIZE);
+        CANVAS_GRID_SIZE *
+        Math.round(this.pos[1] / LiteGraph.CANVAS_GRID_SIZE)
 };
 
 /* Console output */
